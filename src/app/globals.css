@@ -29,18 +29,63 @@
   --font-sans: 'Inter', 'Roboto', system-ui, -apple-system, sans-serif;
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+  transition: all 0.2s ease;
 }
 
 body {
   background: var(--fk-bg);
   color: var(--fk-text);
   font-family: 'Inter', 'Roboto', system-ui, -apple-system, sans-serif;
-  font-size: 14px;
-  line-height: 1.4;
+  font-size: 16px;
+  line-height: 1.5;
   margin: 0;
   -webkit-font-smoothing: antialiased;
+}
+
+button,
+a,
+[role="button"],
+.clickable {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+input,
+textarea {
+  cursor: text;
+}
+
+.page-shell {
+  box-sizing: border-box;
+  margin: 0 auto;
+  max-width: 1400px;
+  padding: 0 24px;
+  width: 100%;
+}
+
+.food-photo {
+  aspect-ratio: 4 / 3;
+  border-radius: 4px;
+  display: block;
+  object-fit: cover;
+  width: 100%;
+}
+
+.restaurant-card {
+  border-radius: 4px;
+}
+
+.restaurant-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
 }
 
 .hide-scrollbar::-webkit-scrollbar {
@@ -77,4 +122,31 @@ body {
 }
 .coin-pulse {
   animation: pulse-coin 0.5s ease-in-out;
+}
+
+@keyframes total-change {
+  0% { color: #2874F0; opacity: 0.55; transform: scale(0.86); }
+  55% { color: #388E3C; transform: scale(1.13); }
+  100% { color: #212121; opacity: 1; transform: scale(1); }
+}
+.total-change {
+  animation: total-change 0.48s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-origin: right center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-shell {
+    padding: 0 16px;
+  }
 }
