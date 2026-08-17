@@ -36,6 +36,14 @@ import {
 } from "lucide-react";
 
 type Screen = "food" | "restaurant" | "checkout" | "tracking" | "confirmed";
+type DeliveryMode = "clubbed" | "priority";
+
+type PlacedOrder = {
+  deliveryMode: DeliveryMode;
+  superCoinsApplied: boolean;
+  total: number;
+  checkoutCoinBalance: number;
+};
 
 type Restaurant = {
   id: number;
@@ -69,8 +77,14 @@ type SearchResult = {
 };
 
 const FULL_COIN_BALANCE = 1240;
-const COINS_USED = 35;
-const COINS_EARNED = 30;
+const COINS_USED = 45;
+const COINS_EARNED = 40;
+const ORDER_BASE_BEFORE_DELIVERY = 197;
+const DELIVERY_FEES: Record<DeliveryMode, number> = { clubbed: 12, priority: 45 };
+
+function getOrderTotal(deliveryMode: DeliveryMode, superCoinsApplied: boolean) {
+  return ORDER_BASE_BEFORE_DELIVERY + DELIVERY_FEES[deliveryMode] - (superCoinsApplied ? COINS_USED : 0);
+}
 
 const FOOD_IMAGES = {
   biryani: "/images/food/biryani.webp",
@@ -81,6 +95,8 @@ const FOOD_IMAGES = {
   vegThali: "/images/food/veg-thali.webp",
   samosas: "/images/food/samosas.webp",
   filterCoffee: "/images/food/filter-coffee.webp",
+  paneerWrap: "/images/food/paneer-wrap.webp",
+  vegBurger: "/images/food/veg-burger.webp",
 } as const;
 
 const CATEGORIES = [
@@ -92,7 +108,7 @@ const CATEGORIES = [
   { icon: Home, label: "Home" },
   { icon: Wrench, label: "Appliances" },
   { icon: Baby, label: "Toys" },
-  { icon: UtensilsCrossed, label: "Food" },
+  { icon: UtensilsCrossed, label: "Dash" },
   { icon: Car, label: "Auto" },
   { icon: Dumbbell, label: "Sports" },
   { icon: Sofa, label: "Furniture" },
@@ -106,8 +122,8 @@ const RESTAURANTS: Restaurant[] = [
     name: "Biryani Blues",
     rating: 4.3,
     time: "18 min",
-    original: 400,
-    price: 142,
+    original: 210,
+    price: 132,
     image: FOOD_IMAGES.biryani,
     cuisine: "Biryani, North Indian, Mughlai",
     distance: "900 m",
@@ -118,8 +134,8 @@ const RESTAURANTS: Restaurant[] = [
     name: "Punjab Grill",
     rating: 4.4,
     time: "21 min",
-    original: 420,
-    price: 156,
+    original: 235,
+    price: 148,
     image: FOOD_IMAGES.butterChicken,
     cuisine: "North Indian, Punjabi",
     distance: "1.2 km",
@@ -130,8 +146,8 @@ const RESTAURANTS: Restaurant[] = [
     name: "South Express",
     rating: 4.5,
     time: "12 min",
-    original: 220,
-    price: 82,
+    original: 140,
+    price: 86,
     image: FOOD_IMAGES.masalaDosa,
     cuisine: "South Indian, Breakfast",
     distance: "650 m",
@@ -142,8 +158,8 @@ const RESTAURANTS: Restaurant[] = [
     name: "Tandoori Nights",
     rating: 4.2,
     time: "25 min",
-    original: 450,
-    price: 165,
+    original: 255,
+    price: 158,
     image: FOOD_IMAGES.paneerTikka,
     cuisine: "Tandoor, North Indian",
     distance: "1.6 km",
@@ -154,8 +170,8 @@ const RESTAURANTS: Restaurant[] = [
     name: "Wok This Way",
     rating: 4.1,
     time: "20 min",
-    original: 320,
-    price: 115,
+    original: 190,
+    price: 118,
     image: FOOD_IMAGES.chowmein,
     cuisine: "Indo-Chinese, Noodles",
     distance: "1.1 km",
@@ -163,39 +179,39 @@ const RESTAURANTS: Restaurant[] = [
   },
   {
     id: 5,
-    name: "Thali House",
-    rating: 4.3,
-    time: "19 min",
-    original: 360,
-    price: 129,
-    image: FOOD_IMAGES.vegThali,
-    cuisine: "North Indian, Homestyle",
-    distance: "1.0 km",
-    dishes: ["Veg Thali", "Dal Makhani"],
-  },
-  {
-    id: 6,
-    name: "Samosa Singh",
-    rating: 4.4,
-    time: "14 min",
-    original: 240,
-    price: 92,
-    image: FOOD_IMAGES.samosas,
-    cuisine: "Snacks, Street Food",
-    distance: "750 m",
-    dishes: ["Samosas", "Filter Coffee"],
-  },
-  {
-    id: 7,
     name: "Chai & More",
     rating: 4.6,
     time: "10 min",
-    original: 180,
-    price: 68,
+    original: 95,
+    price: 62,
     image: FOOD_IMAGES.filterCoffee,
     cuisine: "Beverages, Quick Bites",
     distance: "500 m",
     dishes: ["Filter Coffee", "Samosas"],
+  },
+  {
+    id: 6,
+    name: "Wrap Republic",
+    rating: 4.3,
+    time: "14 min",
+    original: 165,
+    price: 104,
+    image: FOOD_IMAGES.paneerWrap,
+    cuisine: "Rolls, Wraps, Quick Bites",
+    distance: "950 m",
+    dishes: ["Paneer Tikka Wrap"],
+  },
+  {
+    id: 7,
+    name: "Burger Junction",
+    rating: 4.4,
+    time: "16 min",
+    original: 180,
+    price: 112,
+    image: FOOD_IMAGES.vegBurger,
+    cuisine: "Burgers, Quick Bites",
+    distance: "1.1 km",
+    dishes: ["Crispy Veg Burger"],
   },
 ];
 
@@ -258,8 +274,22 @@ const DISH_DETAILS: Record<string, MenuItem> = {
     name: "Filter Coffee",
     veg: true,
     desc: "Freshly brewed South Indian filter coffee with dense foam",
-    price: 68,
+    price: 40,
     image: FOOD_IMAGES.filterCoffee,
+  },
+  "Paneer Tikka Wrap": {
+    name: "Paneer Tikka Wrap",
+    veg: true,
+    desc: "Charred paneer, peppers, onions and mint chutney rolled in soft flatbread",
+    price: 104,
+    image: FOOD_IMAGES.paneerWrap,
+  },
+  "Crispy Veg Burger": {
+    name: "Crispy Veg Burger",
+    veg: true,
+    desc: "Golden vegetable patty, cheese, lettuce, tomato and onion in a toasted bun",
+    price: 112,
+    image: FOOD_IMAGES.vegBurger,
   },
   "Paneer Butter Masala": {
     name: "Paneer Butter Masala",
@@ -317,11 +347,12 @@ const DISH_SEARCH_INDEX = [
   { name: "Paneer Butter Masala", restaurantId: 1 },
   { name: "Dal Makhani", restaurantId: 1 },
   { name: "Masala Dosa", restaurantId: 2 },
-  { name: "Filter Coffee", restaurantId: 2 },
+  { name: "Filter Coffee", restaurantId: 5 },
   { name: "Paneer Tikka", restaurantId: 3 },
   { name: "Vegetable Chowmein", restaurantId: 4 },
-  { name: "Veg Thali", restaurantId: 5 },
-  { name: "Samosas", restaurantId: 6 },
+  { name: "Samosas", restaurantId: 5 },
+  { name: "Paneer Tikka Wrap", restaurantId: 6 },
+  { name: "Crispy Veg Burger", restaurantId: 7 },
 ];
 
 const BANNERS = [
@@ -420,11 +451,13 @@ function SearchBox({
   setQuery,
   results,
   onSelect,
+  resultsId,
 }: {
   query: string;
   setQuery: (value: string) => void;
   results: SearchResult[];
   onSelect: (result: SearchResult) => void;
+  resultsId: string;
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -462,7 +495,7 @@ function SearchBox({
           aria-label="Search restaurants and dishes"
           role="combobox"
           aria-autocomplete="list"
-          aria-controls="food-search-results"
+          aria-controls={resultsId}
           aria-expanded={showDropdown}
           className="min-w-0 flex-1 bg-transparent text-[16px] text-[#212121] outline-none placeholder:text-[#878787]"
         />
@@ -482,7 +515,7 @@ function SearchBox({
       </div>
 
       {showDropdown ? (
-        <div id="food-search-results" role="listbox" className="absolute left-0 right-0 top-[calc(100%+8px)] z-[80] max-h-[420px] overflow-y-auto rounded-[4px] border border-[#E0E0E0] bg-white py-1 shadow-[0_8px_24px_rgba(0,0,0,0.16)]">
+        <div id={resultsId} role="listbox" className="absolute left-0 right-0 top-[calc(100%+8px)] z-[80] max-h-[420px] overflow-y-auto rounded-[4px] border border-[#E0E0E0] bg-white py-1 shadow-[0_8px_24px_rgba(0,0,0,0.16)]">
           {results.length ? (
             results.map((result) => (
               <button
@@ -518,13 +551,22 @@ export function FlipkartFoodApp() {
   const [coins, setCoins] = useState(FULL_COIN_BALANCE);
   const [coinPulse, setCoinPulse] = useState(false);
   const [superCoinsApplied, setSuperCoinsApplied] = useState(true);
-  const [cartCount, setCartCount] = useState(0);
+  const [cartCount, setCartCount] = useState(2);
   const [scrolled, setScrolled] = useState(false);
   const [economicsOpen, setEconomicsOpen] = useState(false);
+  const [clubbedInfoOpen, setClubbedInfoOpen] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
   const [trackingStep, setTrackingStep] = useState(0);
   const [query, setQuery] = useState("");
   const [selectedRestaurantId, setSelectedRestaurantId] = useState(0);
+  const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>("clubbed");
+  const [priorityDeliveriesRemaining, setPriorityDeliveriesRemaining] = useState(3);
+  const [priorityReserved, setPriorityReserved] = useState(false);
+  const [placedOrder, setPlacedOrder] = useState<PlacedOrder | null>(null);
+  const categoryStripRef = useRef<HTMLDivElement>(null);
+  const categoryCenteredRef = useRef(false);
+  const orderPlacementRef = useRef(false);
+  const headerCompact = scrolled && screen !== "checkout";
 
   const pulseCoin = useCallback(() => {
     setCoinPulse(true);
@@ -533,20 +575,42 @@ export function FlipkartFoodApp() {
 
   const navigate = useCallback((nextScreen: Screen) => {
     if (nextScreen === "checkout") {
-      setCartCount(1);
+      orderPlacementRef.current = false;
+      setCartCount(2);
+      setDeliveryMode("clubbed");
+      setPriorityReserved(false);
       setSuperCoinsApplied(true);
       setCoins(FULL_COIN_BALANCE - COINS_USED);
+      setPlacedOrder(null);
       pulseCoin();
     }
-    if (nextScreen === "tracking") setTrackingStep(0);
+    if (nextScreen === "tracking") {
+      if (orderPlacementRef.current) return;
+      orderPlacementRef.current = true;
+      const checkoutCoinBalance = superCoinsApplied ? FULL_COIN_BALANCE - COINS_USED : FULL_COIN_BALANCE;
+      setPlacedOrder({
+        deliveryMode,
+        superCoinsApplied,
+        total: getOrderTotal(deliveryMode, superCoinsApplied),
+        checkoutCoinBalance,
+      });
+      if (deliveryMode === "priority" && priorityReserved) {
+        setPriorityDeliveriesRemaining((remaining) => Math.max(0, remaining - 1));
+        setPriorityReserved(false);
+      }
+      setTrackingStep(0);
+    }
     if (nextScreen === "confirmed") {
-      const postOrderBalance = (superCoinsApplied ? FULL_COIN_BALANCE - COINS_USED : FULL_COIN_BALANCE) + COINS_EARNED;
+      const checkoutCoinBalance = placedOrder?.checkoutCoinBalance
+        ?? (superCoinsApplied ? FULL_COIN_BALANCE - COINS_USED : FULL_COIN_BALANCE);
+      const postOrderBalance = checkoutCoinBalance + COINS_EARNED;
       setCoins(postOrderBalance);
+      setCartCount(0);
       pulseCoin();
     }
     setScreen(nextScreen);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [pulseCoin, superCoinsApplied]);
+    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  }, [deliveryMode, placedOrder, priorityReserved, pulseCoin, superCoinsApplied]);
 
   const openRestaurant = useCallback((restaurantId: number) => {
     setSelectedRestaurantId(restaurantId);
@@ -563,15 +627,42 @@ export function FlipkartFoodApp() {
     });
   }, [pulseCoin]);
 
+  const changeDeliveryMode = useCallback((mode: DeliveryMode) => {
+    if (mode === "priority" && priorityDeliveriesRemaining <= 0) return;
+    setDeliveryMode(mode);
+    setPriorityReserved(mode === "priority");
+  }, [priorityDeliveriesRemaining]);
+
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 120);
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 180);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
+    if (screen !== "food") return;
     const interval = window.setInterval(() => setBannerIndex((index) => (index + 1) % BANNERS.length), 5000);
     return () => window.clearInterval(interval);
+  }, [bannerIndex, screen]);
+
+  useEffect(() => {
+    const strip = categoryStripRef.current;
+    const dashItem = strip?.querySelector<HTMLElement>("[data-dash-category='true']");
+    if (!strip || !dashItem || window.innerWidth > 640 || categoryCenteredRef.current) return;
+    strip.scrollTo({
+      left: dashItem.offsetLeft - (strip.clientWidth - dashItem.offsetWidth) / 2,
+      behavior: "auto",
+    });
+    categoryCenteredRef.current = true;
   }, []);
 
   useEffect(() => {
@@ -629,15 +720,32 @@ export function FlipkartFoodApp() {
   }, [normalizedQuery]);
 
   const selectedRestaurant = RESTAURANTS.find((restaurant) => restaurant.id === selectedRestaurantId) ?? RESTAURANTS[0];
-  const currentTotal = superCoinsApplied ? 132 : 167;
-  const headerCompact = scrolled && screen !== "checkout";
-
+  const currentTotal = getOrderTotal(deliveryMode, superCoinsApplied);
+  const activeOrder = placedOrder ?? {
+    deliveryMode,
+    superCoinsApplied,
+    total: currentTotal,
+    checkoutCoinBalance: superCoinsApplied ? FULL_COIN_BALANCE - COINS_USED : FULL_COIN_BALANCE,
+  };
+  const displayedPriorityDeliveries = Math.max(0, priorityDeliveriesRemaining - (priorityReserved ? 1 : 0));
   const handleSearchSelect = (result: SearchResult) => openRestaurant(result.restaurantId);
 
   return (
     <div className="min-h-screen bg-[#F1F3F6]">
       <header className="sticky top-0 z-50 border-b border-[#E0E0E0] bg-white">
-        {!headerCompact ? (
+        {headerCompact ? (
+          <div className="compact-header bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+            <div className="page-shell flex min-h-14 items-center gap-4 py-2">
+              <div onClick={() => navigate("food")} className="flex items-center gap-1"><FlipkartLogo /><ChevronDown className="h-4 w-4 text-[#878787]" /></div>
+              <div className="min-w-0 flex-1"><SearchBox query={query} setQuery={setQuery} results={searchResults} onSelect={handleSearchSelect} resultsId="dash-search-results-compact" /></div>
+              <div className="flex items-center gap-4">
+                <SuperCoinChip coins={coins} pulse={coinPulse} />
+                <button type="button" className="hidden items-center gap-2 text-[15px] text-[#212121] lg:flex"><User className="h-5 w-5" /> Ashwin</button>
+                <button type="button" onClick={() => cartCount > 0 && navigate("checkout")} className="relative flex items-center gap-2 text-[15px] text-[#212121] hover:text-[#2874F0]"><ShoppingCart className="h-5 w-5" /><span className="hidden sm:inline">Cart</span>{cartCount > 0 ? <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#FF6161] text-[12px] font-bold text-white">{cartCount}</span> : null}</button>
+              </div>
+            </div>
+          </div>
+        ) : (
           <>
             <div className="border-b border-[#F0F0F0] bg-white">
               <div className="page-shell flex min-h-11 items-center justify-between gap-4 py-1.5">
@@ -650,7 +758,7 @@ export function FlipkartFoodApp() {
                       </button>
                     ))}
                     <button type="button" onClick={() => navigate("food")} className="flex items-center gap-1.5 rounded-full border-2 border-[#2874F0] bg-[#F0F5FF] px-3 py-1.5 text-[14px] font-semibold text-[#2874F0] hover:bg-[#E3EDFF]">
-                      <UtensilsCrossed className="h-4 w-4" /> Food
+                      <UtensilsCrossed className="h-4 w-4" /> Dash
                     </button>
                   </div>
                 </div>
@@ -668,7 +776,7 @@ export function FlipkartFoodApp() {
             <div className="bg-white">
               <div className="page-shell flex min-h-16 items-center gap-5 py-2">
                 <div className="min-w-0 flex-1">
-                  <SearchBox query={query} setQuery={setQuery} results={searchResults} onSelect={handleSearchSelect} />
+                  <SearchBox query={query} setQuery={setQuery} results={searchResults} onSelect={handleSearchSelect} resultsId="dash-search-results-primary" />
                 </div>
                 <div className="hidden items-center gap-6 md:flex">
                   <button type="button" className="flex items-center gap-2 text-[16px] text-[#212121] hover:text-[#2874F0]"><User className="h-5 w-5" /> Ashwin <ChevronDown className="h-4 w-4 text-[#878787]" /></button>
@@ -683,11 +791,11 @@ export function FlipkartFoodApp() {
 
             <div className="bg-white">
               <div className="page-shell">
-                <div className="hide-scrollbar flex h-[84px] items-end gap-7 overflow-x-auto">
+                <div ref={categoryStripRef} className="horizontal-rail hide-scrollbar flex h-[84px] items-end gap-7 overflow-x-auto">
                   {CATEGORIES.map(({ icon: Icon, label }) => {
-                    const active = label === "Food";
+                    const active = label === "Dash";
                     return (
-                      <button key={label} type="button" onClick={() => active && navigate("food")} className={`relative flex min-w-[60px] flex-shrink-0 flex-col items-center gap-1.5 pb-3 ${active ? "text-[#2874F0]" : "text-[#6B7280] hover:text-[#212121]"}`}>
+                      <button key={label} type="button" data-dash-category={active} onClick={() => active && navigate("food")} className={`relative flex min-w-[60px] flex-shrink-0 flex-col items-center gap-1.5 pb-3 ${active ? "text-[#2874F0]" : "text-[#6B7280] hover:text-[#212121]"}`}>
                         <span className={`flex h-9 w-9 items-center justify-center rounded-[4px] ${active ? "bg-[#F0F5FF]" : ""}`}><Icon className="h-5 w-5" strokeWidth={1.6} /></span>
                         <span className={`whitespace-nowrap text-[13px] ${active ? "font-bold" : "font-medium"}`}>{label}</span>
                         {active ? <span className="absolute bottom-0 left-0 right-0 h-[3px] rounded-t bg-[#2874F0]" /> : null}
@@ -698,26 +806,14 @@ export function FlipkartFoodApp() {
               </div>
             </div>
           </>
-        ) : (
-          <div className="bg-white">
-            <div className="page-shell flex min-h-16 items-center gap-4 py-2">
-              <div onClick={() => navigate("food")} className="flex items-center gap-1"><FlipkartLogo /><ChevronDown className="h-4 w-4 text-[#878787]" /></div>
-              <div className="min-w-0 flex-1"><SearchBox query={query} setQuery={setQuery} results={searchResults} onSelect={handleSearchSelect} /></div>
-              <div className="flex items-center gap-4">
-                <SuperCoinChip coins={coins} pulse={coinPulse} />
-                <button type="button" className="hidden items-center gap-2 text-[15px] text-[#212121] lg:flex"><User className="h-5 w-5" /> Ashwin</button>
-                <button type="button" onClick={() => cartCount > 0 && navigate("checkout")} className="relative flex items-center gap-2 text-[15px] text-[#212121] hover:text-[#2874F0]"><ShoppingCart className="h-5 w-5" /><span className="hidden sm:inline">Cart</span>{cartCount > 0 ? <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#FF6161] text-[12px] font-bold text-white">{cartCount}</span> : null}</button>
-              </div>
-            </div>
-          </div>
         )}
       </header>
 
       <main className="page-shell">
-        {screen === "food" ? <FoodLanding navigate={navigate} openRestaurant={openRestaurant} restaurants={visibleRestaurants} query={query} bannerIndex={bannerIndex} setBannerIndex={setBannerIndex} /> : null}
+        {screen === "food" ? <FoodLanding navigate={navigate} openRestaurant={openRestaurant} restaurants={visibleRestaurants} query={query} bannerIndex={bannerIndex} setBannerIndex={setBannerIndex} priorityDeliveries={displayedPriorityDeliveries} openClubbedInfo={() => setClubbedInfoOpen(true)} /> : null}
         {screen === "restaurant" ? <RestaurantPage navigate={navigate} restaurant={selectedRestaurant} /> : null}
-        {screen === "checkout" ? <CheckoutPage navigate={navigate} superCoinsApplied={superCoinsApplied} toggleSuperCoins={toggleSuperCoins} total={currentTotal} /> : null}
-        {screen === "tracking" ? <TrackingPage step={trackingStep} total={currentTotal} /> : null}
+        {screen === "checkout" ? <CheckoutPage navigate={navigate} superCoinsApplied={superCoinsApplied} toggleSuperCoins={toggleSuperCoins} total={currentTotal} deliveryMode={deliveryMode} changeDeliveryMode={changeDeliveryMode} priorityDeliveriesRemaining={displayedPriorityDeliveries} /> : null}
+        {screen === "tracking" ? <TrackingPage step={trackingStep} order={activeOrder} /> : null}
         {screen === "confirmed" ? <ConfirmedPage navigate={navigate} coins={coins} /> : null}
       </main>
 
@@ -735,12 +831,13 @@ export function FlipkartFoodApp() {
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#2B3A4E] pt-5">
             <p>&copy; 2007–2026 Flipkart.com</p>
-            <button type="button" onClick={() => setEconomicsOpen(true)} className="underline hover:text-white">The economics behind Flipkart Food</button>
+            <button type="button" onClick={() => setEconomicsOpen(true)} className="underline hover:text-white">The economics behind Flipkart Dash</button>
           </div>
         </div>
       </footer>
 
       {economicsOpen ? <EconomicsDrawer onClose={() => setEconomicsOpen(false)} /> : null}
+      {clubbedInfoOpen ? <ClubbedExplainerModal onClose={() => setClubbedInfoOpen(false)} /> : null}
     </div>
   );
 }
@@ -753,8 +850,9 @@ function RestaurantCard({ restaurant, onOpen, rail = false }: { restaurant: Rest
         <span className="block truncate text-[18px] font-semibold text-[#212121] group-hover:text-[#2874F0]">{restaurant.name}</span>
         <span className="mt-1 block truncate text-[14px] text-[#878787]">{restaurant.cuisine}</span>
         <span className="mt-2 flex items-center gap-2.5"><RatingPill rating={restaurant.rating} /><span className="flex items-center gap-1 text-[14px] text-[#878787]"><Clock className="h-4 w-4" /> {restaurant.time}</span></span>
+        <span className="mt-2 inline-flex rounded-full bg-[#EAF2FF] px-2.5 py-1 text-[12px] font-semibold text-[#2874F0]">Dash Hub · Sector 12</span>
         <span className="mt-2 flex items-center gap-2"><span className="text-[14px] text-[#878787] line-through">₹{restaurant.original}</span><span className="text-[18px] font-bold text-[#212121]">₹{restaurant.price}</span></span>
-        <span className="mt-1.5 flex items-center gap-1.5"><span className="flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-br from-[#FFD700] to-[#FFA500]"><Zap className="h-2.5 w-2.5 fill-white text-white" /></span><span className="text-[14px] text-[#878787]">SuperCoins applied</span></span>
+        <span className="mt-1.5 flex items-center gap-1.5"><span className="flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-br from-[#FFD700] to-[#FFA500]"><Zap className="h-2.5 w-2.5 fill-white text-white" /></span><span className="text-[14px] text-[#878787]">SuperCoins + Dash Hub pricing</span></span>
       </span>
     </button>
   );
@@ -767,6 +865,8 @@ function FoodLanding({
   query,
   bannerIndex,
   setBannerIndex,
+  priorityDeliveries,
+  openClubbedInfo,
 }: {
   navigate: (screen: Screen) => void;
   openRestaurant: (id: number) => void;
@@ -774,8 +874,12 @@ function FoodLanding({
   query: string;
   bannerIndex: number;
   setBannerIndex: (index: number) => void;
+  priorityDeliveries: number;
+  openClubbedInfo: () => void;
 }) {
   const railRef = useRef<HTMLDivElement>(null);
+  const [railEdges, setRailEdges] = useState({ atStart: true, atEnd: false });
+  const hubBrands = RESTAURANTS.slice(0, 6);
   const occasions = [
     { title: "Sunday", detail: "mess closed", image: FOOD_IMAGES.vegThali },
     { title: "Late night", detail: "after 9:30pm", image: FOOD_IMAGES.chowmein },
@@ -783,18 +887,47 @@ function FoodLanding({
     { title: "Craving", detail: "something special", image: FOOD_IMAGES.paneerTikka },
   ];
 
+  const updateRailEdges = useCallback(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+    const atStart = rail.scrollLeft <= 4;
+    const atEnd = rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 4;
+    setRailEdges((current) => current.atStart === atStart && current.atEnd === atEnd ? current : { atStart, atEnd });
+  }, []);
+
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+    const frame = window.requestAnimationFrame(updateRailEdges);
+    rail.addEventListener("scroll", updateRailEdges, { passive: true });
+    const resizeObserver = new ResizeObserver(updateRailEdges);
+    resizeObserver.observe(rail);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      rail.removeEventListener("scroll", updateRailEdges);
+      resizeObserver.disconnect();
+    };
+  }, [restaurants, updateRailEdges]);
+
+  const scrollRestaurants = (direction: -1 | 1) => {
+    const rail = railRef.current;
+    if (!rail) return;
+    const distance = Math.max(260, rail.clientWidth - 16);
+    rail.scrollBy({ left: direction * distance, behavior: "smooth" });
+  };
+
   return (
     <div className="fade-in py-6">
       <section aria-label="Featured food offers" className="relative mb-7">
         <div className="overflow-hidden rounded-[4px]">
-          <div className="flex transition-transform duration-500 ease-out" style={{ transform: `translateX(-${bannerIndex * 100}%)` }}>
+          <div className="banner-track flex" style={{ transform: `translateX(-${bannerIndex * 100}%)` }}>
             {BANNERS.map((banner, index) => (
-              <button type="button" key={banner.title} onClick={() => openRestaurant(index === 2 ? 4 : index === 1 ? 3 : 0)} className={`relative min-h-[240px] min-w-full overflow-hidden rounded-[4px] text-left sm:min-h-[300px] ${banner.background}`}>
-                <span className="absolute right-4 top-1/2 w-[400px] max-w-[48%] -translate-y-1/2 overflow-hidden rounded-[4px] shadow-[0_8px_24px_rgba(0,0,0,0.28)]">
-                  <Photo src={banner.image} alt="" priority={index === 0} sizes="(max-width: 640px) 48vw, 400px" />
+              <button type="button" key={banner.title} onClick={() => openRestaurant(index === 2 ? 4 : index === 1 ? 3 : 0)} className={`relative w-full flex-shrink-0 overflow-hidden rounded-[4px] text-left sm:min-h-[300px] ${banner.background}`}>
+                <span className="absolute right-0 top-0 w-full overflow-hidden rounded-[4px] shadow-[0_8px_24px_rgba(0,0,0,0.28)] sm:right-4 sm:top-1/2 sm:w-[400px] sm:max-w-[48%] sm:-translate-y-1/2">
+                  <Photo src={banner.image} alt="" priority={index === 0} sizes="(max-width: 640px) calc(100vw - 48px), 400px" />
                 </span>
                 <span className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/10" />
-                <span className="relative z-10 block max-w-[58%] px-16 py-10 text-white sm:px-20 sm:py-16">
+                <span className="relative z-10 block max-w-full px-6 pb-8 pt-[280px] text-white sm:max-w-[58%] sm:px-20 sm:py-16">
                   <span className="mb-3 block text-[13px] font-bold tracking-[0.16em] text-white/80">{banner.eyebrow}</span>
                   <span className="block text-[28px] font-bold leading-tight sm:text-[36px]">{banner.title}</span>
                   <span className="mt-3 block text-[16px] leading-relaxed text-white/85 sm:text-[18px]">{banner.subtitle}</span>
@@ -804,31 +937,71 @@ function FoodLanding({
             ))}
           </div>
         </div>
-        <button type="button" aria-label="Previous banner" onClick={() => setBannerIndex((bannerIndex - 1 + BANNERS.length) % BANNERS.length)} className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow hover:bg-[#F5F5F5] hover:shadow-md"><ChevronLeft className="h-5 w-5 text-[#212121]" /></button>
-        <button type="button" aria-label="Next banner" onClick={() => setBannerIndex((bannerIndex + 1) % BANNERS.length)} className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow hover:bg-[#F5F5F5] hover:shadow-md"><ChevronRight className="h-5 w-5 text-[#212121]" /></button>
+        <button type="button" aria-label="Previous banner" onClick={() => setBannerIndex((bannerIndex - 1 + BANNERS.length) % BANNERS.length)} className="absolute left-3 top-[128px] flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow hover:bg-[#F5F5F5] hover:shadow-md sm:top-1/2"><ChevronLeft className="h-5 w-5 text-[#212121]" /></button>
+        <button type="button" aria-label="Next banner" onClick={() => setBannerIndex((bannerIndex + 1) % BANNERS.length)} className="absolute right-3 top-[128px] flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow hover:bg-[#F5F5F5] hover:shadow-md sm:top-1/2"><ChevronRight className="h-5 w-5 text-[#212121]" /></button>
         <div className="mt-3 flex justify-center gap-2">{BANNERS.map((banner, index) => <button type="button" aria-label={`Show banner ${index + 1}`} key={banner.title} onClick={() => setBannerIndex(index)} className={`h-2.5 rounded-full ${bannerIndex === index ? "w-7 bg-[#2874F0]" : "w-2.5 bg-[#C7C7C7] hover:bg-[#878787]"}`} />)}</div>
+      </section>
+
+      <section className="mb-5 rounded-[4px] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
+        <h2 className="text-[22px] font-semibold text-[#212121]">Your Dash Hub — Sector 12, 900m away</h2>
+        <p className="mt-1 text-[16px] text-[#616161]">Located next to campus. Six brands cooking under one roof, one rider brings them all.</p>
+        <p className="mt-1 text-[14px] leading-relaxed text-[#878787]">Hubs are sited beside high-density campuses, so orders naturally cluster and delivery costs split.</p>
+        <div className="horizontal-rail hide-scrollbar mt-5 flex gap-4 overflow-x-auto pb-1">
+          {hubBrands.map((brand) => (
+            <button type="button" key={brand.id} onClick={() => openRestaurant(brand.id)} className="restaurant-card group w-[190px] flex-shrink-0 overflow-hidden border border-[#E0E0E0] bg-white text-left">
+              <Photo src={brand.image} alt={`${brand.name} at Dash Hub`} sizes="190px" />
+              <span className="block truncate p-3 text-[16px] font-semibold text-[#212121] group-hover:text-[#2874F0]">{brand.name}</span>
+            </button>
+          ))}
+        </div>
+        <p className="mt-4 border-t border-[#E0E0E0] pt-4 text-[14px] leading-relaxed text-[#878787]">Brands cook. Dash handles delivery, tech and payments — so commission stays near 5%, not 25%.</p>
+      </section>
+
+      <section className="mb-5 rounded-[4px] border border-[#C8E6C9] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
+        <div className="flex items-start gap-4">
+          <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#E8F5E9]"><CheckCircle2 className="h-6 w-6 text-[#388E3C]" /></span>
+          <div className="min-w-0">
+            <p className="text-[14px] font-semibold text-[#388E3C]">Student verified · ashwin@[college].edu</p>
+            <h2 className="mt-1 text-[22px] font-semibold text-[#212121]">You have {priorityDeliveries} Priority deliveries left this month</h2>
+            <p className="mt-2 max-w-[980px] text-[15px] leading-relaxed text-[#616161]">Verified students get 3 Priority orders a month — solo rider, 12–15 min. Every other order arrives Clubbed at 20–25 min, and costs less.</p>
+            <button type="button" onClick={openClubbedInfo} className="mt-3 text-[14px] font-semibold text-[#2874F0] hover:text-[#1A5DC8]">How Clubbed delivery works</button>
+          </div>
+        </div>
       </section>
 
       <section className="mb-5 rounded-[4px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
         <div className="flex items-center justify-between px-5 pb-3 pt-5">
           <div><h2 className="text-[22px] font-semibold text-[#212121]">{query ? `Results for “${query}”` : "Ashwin, hungry again?"}</h2><p className="mt-1 text-[14px] text-[#878787]">Real menus, campus-friendly delivery times</p></div>
-          <button type="button" onClick={() => railRef.current?.scrollTo({ left: 0, behavior: "smooth" })} className="text-[14px] font-semibold text-[#2874F0] hover:text-[#1A5DC8]">VIEW ALL</button>
+          <button type="button" onClick={() => document.getElementById("all-restaurants")?.scrollIntoView()} className="text-[14px] font-semibold text-[#2874F0] hover:text-[#1A5DC8]">VIEW ALL</button>
         </div>
-        {restaurants.length ? (
-          <div className="relative px-5 pb-5">
-            <div ref={railRef} className="hide-scrollbar flex gap-4 overflow-x-auto pr-14">{restaurants.map((restaurant) => <RestaurantCard key={restaurant.id} restaurant={restaurant} rail onOpen={() => openRestaurant(restaurant.id)} />)}</div>
-            <button type="button" aria-label="Scroll restaurants" onClick={() => railRef.current?.scrollBy({ left: 552, behavior: "smooth" })} className="absolute right-3 top-[128px] flex h-11 w-11 items-center justify-center rounded-full border border-[#E0E0E0] bg-white shadow hover:bg-[#F5F5F5] hover:shadow-md"><ChevronRight className="h-5 w-5" /></button>
+        <div className="grid min-w-0 gap-4 px-5 pb-5 lg:grid-cols-[minmax(0,1fr)_280px]">
+          <div className="relative min-w-0">
+            {restaurants.length ? <><div ref={railRef} className="horizontal-rail hide-scrollbar flex gap-4 overflow-x-auto">{restaurants.map((restaurant) => <RestaurantCard key={restaurant.id} restaurant={restaurant} rail onOpen={() => openRestaurant(restaurant.id)} />)}</div>{!railEdges.atStart ? <button type="button" aria-label="Previous restaurants" onClick={() => scrollRestaurants(-1)} className="absolute left-1 top-[96px] flex h-11 w-11 items-center justify-center rounded-full border border-[#E0E0E0] bg-white shadow hover:bg-[#F5F5F5] hover:shadow-md"><ChevronLeft className="h-5 w-5" /></button> : null}{!railEdges.atEnd ? <button type="button" aria-label="More restaurants" onClick={() => scrollRestaurants(1)} className="absolute right-1 top-[96px] flex h-11 w-11 items-center justify-center rounded-full border border-[#E0E0E0] bg-white shadow hover:bg-[#F5F5F5] hover:shadow-md"><ChevronRight className="h-5 w-5" /></button> : null}</> : <div className="py-5 text-[16px] text-[#878787]">No restaurants match this search. Try a dish or cuisine.</div>}
           </div>
-        ) : <div className="px-5 pb-7 text-[16px] text-[#878787]">No restaurants match this search. Try a dish or cuisine.</div>}
+          <aside className="min-w-0 rounded-[4px] bg-[#111827] p-3 text-white">
+            <div className="mx-auto aspect-[9/16] w-full max-w-[205px] overflow-hidden rounded-[4px] bg-black">
+              <iframe
+                className="h-full w-full border-0"
+                src="https://www.youtube-nocookie.com/embed/2nP8rSEEeus"
+                title="Flipkart Dash campus delivery video"
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              />
+            </div>
+            <p className="mt-2 text-center text-[13px] text-white/75">Made for your campus, made for you.</p>
+          </aside>
+        </div>
       </section>
 
-      <section className="rounded-[4px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
+      <section id="all-restaurants" className="scroll-mt-20 rounded-[4px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
         <div className="px-5 pb-3 pt-5"><h2 className="text-[22px] font-semibold text-[#212121]">Under 20 minutes near Hostel Block C</h2><p className="mt-1 text-[14px] text-[#878787]">Delivered by eKart — Flipkart’s own fleet</p></div>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4 px-5 pb-5">{restaurants.map((restaurant) => <RestaurantCard key={restaurant.id} restaurant={restaurant} onOpen={() => openRestaurant(restaurant.id)} />)}</div>
       </section>
 
       <section className="mt-5 rounded-[4px] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
-        <div className="mb-4"><h2 className="text-[22px] font-semibold text-[#212121]">Why he comes back</h2><p className="mt-1 text-[14px] text-[#878787]">Four moments where convenience matters more than a routine meal.</p></div>
+        <div className="mb-4"><h2 className="text-[22px] font-semibold text-[#212121]">Specially for you, Ashwin</h2><p className="mt-1 text-[14px] text-[#878787]">Your go-to picks for Sundays, late nights, match nights and cravings.</p></div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {occasions.map((occasion) => (
             <button type="button" key={occasion.title} onClick={() => navigate("food")} className="restaurant-card overflow-hidden border border-[#E0E0E0] bg-white text-left">
@@ -837,7 +1010,7 @@ function FoodLanding({
             </button>
           ))}
         </div>
-        <p className="mt-5 rounded-[4px] bg-[#F0F5FF] px-4 py-3 text-[16px] font-medium text-[#2874F0]">The mess is free on weekdays. We win the four times a month it can&apos;t serve.</p>
+        <p className="mt-5 rounded-[4px] bg-[#F0F5FF] px-4 py-3 text-[16px] font-medium text-[#2874F0]">Your campus, your schedule — Dash delivers whenever you need it.</p>
       </section>
     </div>
   );
@@ -853,7 +1026,7 @@ function RestaurantPage({ navigate, restaurant }: { navigate: (screen: Screen) =
   return (
     <div className="fade-in py-6">
       <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-1.5 text-[14px] text-[#878787]">
-        <button type="button" onClick={() => navigate("food")} className="hover:text-[#2874F0]">Food</button><ChevronRight className="h-4 w-4" /><span className="text-[#212121]">{restaurant.name}</span>
+        <button type="button" onClick={() => navigate("food")} className="hover:text-[#2874F0]">Dash</button><ChevronRight className="h-4 w-4" /><span className="text-[#212121]">{restaurant.name}</span>
       </nav>
       <div className="flex flex-col gap-6 lg:flex-row">
         <div className="lg:w-[40%]">
@@ -909,12 +1082,29 @@ function BillRow({ label, value, original, subtext }: { label: string; value: st
   );
 }
 
-function CheckoutPage({ navigate, superCoinsApplied, toggleSuperCoins, total }: { navigate: (screen: Screen) => void; superCoinsApplied: boolean; toggleSuperCoins: () => void; total: number }) {
-  const savings = 241 - total;
-  const savingsPercent = Math.round((savings / 241) * 100);
+function CheckoutPage({
+  navigate,
+  superCoinsApplied,
+  toggleSuperCoins,
+  total,
+  deliveryMode,
+  changeDeliveryMode,
+  priorityDeliveriesRemaining,
+}: {
+  navigate: (screen: Screen) => void;
+  superCoinsApplied: boolean;
+  toggleSuperCoins: () => void;
+  total: number;
+  deliveryMode: DeliveryMode;
+  changeDeliveryMode: (mode: DeliveryMode) => void;
+  priorityDeliveriesRemaining: number;
+}) {
+  const savings = 310 - total;
+  const savingsPercent = Math.round((savings / 310) * 100);
+  const clubbed = deliveryMode === "clubbed";
   return (
     <div className="fade-in py-6">
-      <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-1.5 text-[14px] text-[#878787]"><button type="button" onClick={() => navigate("food")} className="hover:text-[#2874F0]">Food</button><ChevronRight className="h-4 w-4" /><button type="button" onClick={() => navigate("restaurant")} className="hover:text-[#2874F0]">Biryani Blues</button><ChevronRight className="h-4 w-4" /><span className="text-[#212121]">Checkout</span></nav>
+      <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-1.5 text-[14px] text-[#878787]"><button type="button" onClick={() => navigate("food")} className="hover:text-[#2874F0]">Dash</button><ChevronRight className="h-4 w-4" /><span>Cart</span><ChevronRight className="h-4 w-4" /><span className="text-[#212121]">Checkout</span></nav>
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(360px,0.75fr)]">
         <div>
           <section className="overflow-hidden rounded-[4px] shadow-[0_1px_2px_rgba(0,0,0,0.1)]">
@@ -923,18 +1113,34 @@ function CheckoutPage({ navigate, superCoinsApplied, toggleSuperCoins, total }: 
             </div>
             <div className="border border-t-0 border-[#D6E4FF] bg-[#F0F5FF] p-5">
               <div className={`mb-5 flex items-center justify-between gap-4 rounded-[4px] border bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.08)] ${superCoinsApplied ? "border-[#2874F0] ring-2 ring-[#2874F0]/10" : "border-[#E0E0E0]"}`}>
-                <div className="flex items-center gap-4"><span className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#FFD700] to-[#FFA500] shadow"><Zap className="h-6 w-6 fill-white text-white" /></span><div><p className="text-[18px] font-semibold text-[#212121]">Apply SuperCoins</p><p className="mt-0.5 text-[14px] text-[#878787]">Use 35 coins to save ₹35 instantly</p></div></div>
+                <div className="flex items-center gap-4"><span className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#FFD700] to-[#FFA500] shadow"><Zap className="h-6 w-6 fill-white text-white" /></span><div><p className="text-[18px] font-semibold text-[#212121]">Apply SuperCoins</p><p className="mt-0.5 text-[14px] text-[#878787]">Use 45 coins to save ₹45 instantly</p></div></div>
                 <button type="button" role="switch" aria-checked={superCoinsApplied} aria-label="Apply SuperCoins" onClick={toggleSuperCoins} className={`relative h-8 w-14 flex-shrink-0 rounded-full ${superCoinsApplied ? "bg-[#2874F0]" : "bg-[#BDBDBD]"}`}><span className={`absolute left-0 top-1 h-6 w-6 rounded-full bg-white shadow-md ${superCoinsApplied ? "translate-x-7" : "translate-x-1"}`} /></button>
+              </div>
+
+              <div className="mb-4 rounded-[4px] border border-[#A5D6A7] bg-[#E8F5E9] p-4">
+                <div className="flex items-start gap-3"><CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#388E3C]" /><div><p className="text-[16px] font-semibold text-[#256D2B]">Bundled — two brands, one rider, one delivery fee.</p><p className="mt-1 text-[14px] text-[#4F6F52]">Both cook inside your Dash Hub, so we don&apos;t charge you twice.</p><div className="mt-2 flex flex-wrap gap-2"><span className="rounded-full bg-white px-2.5 py-1 text-[12px] font-semibold text-[#256D2B]">Biryani Blues</span><span className="rounded-full bg-white px-2.5 py-1 text-[12px] font-semibold text-[#256D2B]">Chai &amp; More</span></div></div></div>
+              </div>
+
+              <div role="radiogroup" aria-label="Delivery mode" className="mb-4 space-y-3">
+                <button type="button" role="radio" aria-checked={clubbed} onClick={() => changeDeliveryMode("clubbed")} className={`flex w-full items-start gap-3 rounded-[4px] border p-4 text-left ${clubbed ? "border-[#2874F0] bg-[#F0F5FF] shadow-[0_2px_8px_rgba(40,116,240,0.12)]" : "border-[#E0E0E0] bg-white hover:border-[#9BBDF8]"}`}>
+                  <span className={`mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 ${clubbed ? "border-[#2874F0]" : "border-[#BDBDBD]"}`}>{clubbed ? <span className="h-2.5 w-2.5 rounded-full bg-[#2874F0]" /> : null}</span>
+                  <span className="min-w-0 flex-1"><span className="flex flex-wrap items-center justify-between gap-2"><strong className="text-[17px] text-[#212121]">Clubbed — 20–25 min</strong><strong className="text-[18px] text-[#2874F0]">₹12 delivery</strong></span><span className="mt-1 block text-[14px] leading-relaxed text-[#616161]">Your order rides with others going to Hostel Block C. Cheapest option, always available.</span></span>
+                </button>
+                <button type="button" role="radio" aria-checked={!clubbed} aria-disabled={priorityDeliveriesRemaining <= 0} onClick={() => changeDeliveryMode("priority")} className={`flex w-full items-start gap-3 rounded-[4px] border p-4 text-left ${!clubbed ? "border-[#F9A825] bg-[#FFF8E1] shadow-[0_2px_8px_rgba(249,168,37,0.14)]" : "border-[#E0E0E0] bg-white hover:border-[#F9A825]"}`}>
+                  <span className={`mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 ${!clubbed ? "border-[#F9A825]" : "border-[#BDBDBD]"}`}>{!clubbed ? <span className="h-2.5 w-2.5 rounded-full bg-[#F9A825]" /> : null}</span>
+                  <span className="min-w-0 flex-1"><span className="flex flex-wrap items-center justify-between gap-2"><span className="flex flex-wrap items-center gap-2"><strong className="text-[17px] text-[#212121]">Priority — 12–15 min</strong><span className="rounded-full bg-[#FFF0C2] px-2 py-0.5 text-[12px] font-semibold text-[#9A6700]">Uses 1 of 3</span></span><strong className="text-[18px] text-[#B26A00]">₹45 delivery</strong></span><span className="mt-1 block text-[14px] leading-relaxed text-[#616161]">Solo rider, straight to you. {priorityDeliveriesRemaining} left this month.</span></span>
+                </button>
               </div>
 
               <div className="overflow-hidden rounded-[4px] border border-[#E0E0E0] bg-white">
                 <div className="space-y-4 p-5">
-                  <BillRow label="Hyderabadi Biryani × 1" value="₹120" subtext="ONDC direct · same price as in-store" />
-                  <BillRow label="Delivery fee" original="₹45" value="₹12" subtext="batched to Hostel Block C · split across 8 orders" />
+                  <BillRow label="Hyderabadi Biryani × 1" value="₹120" subtext="Cooked at Dash Hub Sector 12 · no menu inflation" />
+                  <BillRow label="Filter Coffee × 1" value="₹40" subtext="Same hub, same rider" />
+                  <BillRow label={`Delivery fee (${clubbed ? "Clubbed" : "Priority"})`} original="₹90" value={`₹${DELIVERY_FEES[deliveryMode]}`} subtext={clubbed ? "bundled across brands, batched to Hostel Block C" : "solo rider, straight from Dash Hub Sector 12"} />
                   <BillRow label="Platform fee" value="₹12" />
                   <BillRow label="Packaging" value="₹15" />
-                  <BillRow label="GST" value="₹8" />
-                  {superCoinsApplied ? <div className="fade-in flex items-center justify-between gap-3 rounded-[4px] bg-[#FFFBE6] px-3 py-2.5"><div className="flex flex-wrap items-center gap-2"><span className="text-[16px] font-medium text-[#212121]">SuperCoins applied</span><span className="rounded-[4px] bg-[#FFE11B] px-2 py-1 text-[12px] font-bold text-[#174EA6]">Best value for you</span></div><span className="flex-shrink-0 text-[16px] font-semibold text-[#388E3C]">−35 coins (₹35)</span></div> : null}
+                  <BillRow label="GST" value="₹10" />
+                  {superCoinsApplied ? <div className="fade-in flex items-center justify-between gap-3 rounded-[4px] bg-[#FFFBE6] px-3 py-2.5"><div className="flex flex-wrap items-center gap-2"><span className="text-[16px] font-medium text-[#212121]">SuperCoins applied</span><span className="rounded-[4px] bg-[#FFE11B] px-2 py-1 text-[12px] font-bold text-[#174EA6]">Best value for you</span></div><span className="flex-shrink-0 text-[16px] font-semibold text-[#388E3C]">−45 coins (₹45)</span></div> : null}
                 </div>
                 <div className="mx-5 border-t-2 border-[#212121]" />
                 <div className="flex items-center justify-between p-5"><span className="text-[22px] font-semibold text-[#212121]">You pay</span><span key={total} className="total-change text-[36px] font-bold tabular-nums text-[#212121]">₹{total}</span></div>
@@ -949,16 +1155,17 @@ function CheckoutPage({ navigate, superCoinsApplied, toggleSuperCoins, total }: 
         <aside className="space-y-4">
           <section className="rounded-[4px] border border-[#E0E0E0] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
             <h2 className="text-[18px] font-semibold leading-relaxed text-[#212121]">On other food delivery platforms, this same order:</h2>
-            <p className="mt-2 text-[36px] font-bold tabular-nums text-[#212121]">₹241</p>
+            <p className="mt-2 text-[36px] font-bold tabular-nums text-[#212121]">₹310</p>
+            <p className="text-[14px] text-[#878787]">Two brands, two restaurants, two delivery fees.</p>
             <div className="mt-5 space-y-5">
-              <div><div className="mb-1.5 flex items-center justify-between text-[14px] text-[#616161]"><span>Other platforms</span><span>₹241</span></div><div className="relative h-9 overflow-hidden rounded-[4px] bg-[#FFEBEE]"><div className="h-full w-full rounded-[4px] bg-[#E53935]" /><span className="absolute left-3 top-1/2 -translate-y-1/2 text-[15px] font-bold text-white">₹241</span></div></div>
-              <div><div className="mb-1.5 flex items-center justify-between text-[14px] text-[#616161]"><span>Flipkart Food</span><span className="animate-num">₹{total}</span></div><div className="relative h-9 overflow-hidden rounded-[4px] bg-[#E3F2FD]"><div className="h-full rounded-[4px] bg-[#2874F0]" style={{ width: `${(total / 241) * 100}%` }} /><span key={total} className="total-change absolute left-3 top-1/2 -translate-y-1/2 text-[15px] font-bold text-white">₹{total}</span></div></div>
+              <div><div className="mb-1.5 flex items-center justify-between text-[14px] text-[#616161]"><span>Other platforms</span><span>₹310</span></div><div className="relative h-9 overflow-hidden rounded-[4px] bg-[#FFEBEE]"><div className="h-full w-full rounded-[4px] bg-[#E53935]" /><span className="absolute left-3 top-1/2 -translate-y-1/2 text-[15px] font-bold text-white">₹310</span></div></div>
+              <div><div className="mb-1.5 flex items-center justify-between text-[14px] text-[#616161]"><span>Flipkart Dash</span><span className="animate-num">₹{total}</span></div><div className="relative h-9 overflow-hidden rounded-[4px] bg-[#E3F2FD]"><div className="h-full rounded-[4px] bg-[#2874F0]" style={{ width: `${(total / 310) * 100}%` }} /><span key={total} className="total-change absolute left-3 top-1/2 -translate-y-1/2 text-[15px] font-bold text-white">₹{total}</span></div></div>
             </div>
-            <div className="mt-5 border-t border-[#E0E0E0] pt-4"><p className="text-[17px] font-semibold text-[#388E3C]">You save ₹{savings} — {savingsPercent}% less.</p><p className="mt-2 text-[14px] leading-relaxed text-[#878787]">Comparison assumes identical dish from the same restaurant, including all fees and taxes.</p></div>
+            <div className="mt-5 border-t border-[#E0E0E0] pt-4"><p className="text-[17px] font-semibold text-[#388E3C]">You save ₹{savings} — {savingsPercent}% less.</p><p className="mt-2 text-[14px] leading-relaxed text-[#878787]">Comparison assumes identical items from the same brands, including all fees and taxes.</p></div>
           </section>
           <section className="rounded-[4px] border border-[#E0E0E0] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
             <div className="space-y-4">
-              {["SuperCoins earned on your Flipkart shopping", "ONDC-powered — no menu inflation", "Batched campus delivery — fees split, not subsidised"].map((badge) => <div key={badge} className="flex items-center gap-3 text-[15px] text-[#212121]"><span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[#E8F5E9]"><Check className="h-4 w-4 text-[#388E3C]" /></span><span>{badge}</span></div>)}
+              {["Cross-brand bundling — one rider, one fee", "Brands cook, Dash delivers — commission near 5%", "SuperCoins earned on your Flipkart shopping"].map((badge) => <div key={badge} className="flex items-center gap-3 text-[15px] text-[#212121]"><span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[#E8F5E9]"><Check className="h-4 w-4 text-[#388E3C]" /></span><span>{badge}</span></div>)}
             </div>
           </section>
         </aside>
@@ -967,21 +1174,26 @@ function CheckoutPage({ navigate, superCoinsApplied, toggleSuperCoins, total }: 
   );
 }
 
-function TrackingPage({ step, total }: { step: number; total: number }) {
+function TrackingPage({ step, order }: { step: number; order: PlacedOrder }) {
   const steps = ["Confirmed", "Preparing", "Picked up", "Arriving"];
+  const priority = order.deliveryMode === "priority";
+  const arrival = priority ? "Arriving in 14 minutes · Priority" : "Arriving in 22 minutes";
+  const modeDetail = priority
+    ? "Solo rider from Dash Hub, Sector 12."
+    : "Clubbed with 6 other orders to Hostel Block C — collected from Dash Hub, Sector 12.";
   return (
     <div className="fade-in py-6">
       <div className="flex flex-col gap-6 lg:flex-row">
         <div className="lg:w-[60%]">
           <div className="relative h-[420px] overflow-hidden rounded-[4px] border border-[#C8E6C9] bg-[#E8F5E9]">
-            <div className="absolute inset-0 flex items-center justify-center"><div className="relative h-[240px] w-[360px]"><div className="absolute left-0 right-0 top-1/2 h-[3px] bg-[#A5D6A7]" /><div className="absolute bottom-0 left-1/2 top-0 w-[3px] bg-[#A5D6A7]" /><div className="absolute left-1/2 top-0 -translate-x-1/2 text-center"><span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#2874F0] shadow"><UtensilsCrossed className="h-5 w-5 text-white" /></span><span className="mt-1 inline-block rounded-[4px] bg-white px-2 py-1 text-[13px] font-medium shadow">Restaurant</span></div><div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-center"><span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#FF6161] shadow"><MapPin className="h-5 w-5 text-white" /></span><span className="mt-1 inline-block rounded-[4px] bg-white px-2 py-1 text-[13px] font-medium shadow">Hostel Block C</span></div>{step >= 2 ? <div className={`absolute left-1/2 -translate-x-1/2 ${step >= 3 ? "top-[172px]" : "top-[82px]"}`}><span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#FFE11B] shadow"><Bike className="h-4 w-4 text-[#212121]" /></span></div> : null}</div></div>
-            <div className="absolute bottom-4 left-4 rounded-[4px] bg-white px-4 py-3 shadow"><p className="text-[16px] font-bold text-[#212121]">Arriving in 14 minutes</p><p className="mt-0.5 text-[14px] text-[#878787]">900 m away</p></div>
+            <div className="absolute inset-0 flex items-center justify-center"><div className="relative h-[240px] w-[360px]"><div className="absolute left-0 right-0 top-1/2 h-[3px] bg-[#A5D6A7]" /><div className="absolute bottom-0 left-1/2 top-0 w-[3px] bg-[#A5D6A7]" /><div className="absolute left-1/2 top-0 -translate-x-1/2 text-center"><span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#2874F0] shadow"><UtensilsCrossed className="h-5 w-5 text-white" /></span><span className="mt-1 inline-block rounded-[4px] bg-white px-2 py-1 text-[13px] font-medium shadow">Dash Hub</span></div><div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-center"><span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#FF6161] shadow"><MapPin className="h-5 w-5 text-white" /></span><span className="mt-1 inline-block rounded-[4px] bg-white px-2 py-1 text-[13px] font-medium shadow">Hostel Block C</span></div>{step >= 2 ? <div className={`absolute left-1/2 -translate-x-1/2 ${step >= 3 ? "top-[172px]" : "top-[82px]"}`}><span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#FFE11B] shadow"><Bike className="h-4 w-4 text-[#212121]" /></span></div> : null}</div></div>
+            <div className="absolute bottom-4 left-4 right-4 rounded-[4px] bg-white px-4 py-3 shadow"><p className="text-[16px] font-bold text-[#212121]">{arrival}</p><p className="mt-0.5 text-[14px] leading-relaxed text-[#878787]">{modeDetail}</p></div>
           </div>
         </div>
         <div className="lg:w-[40%]">
-          <section className="rounded-[4px] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.08)]"><h1 className="mb-5 text-[22px] font-semibold text-[#212121]">Order Status</h1><div className="relative ml-3">{steps.map((label, index) => <div key={label} className="relative flex items-start gap-3 pb-7 last:pb-0">{index < steps.length - 1 ? <span className={`absolute left-[8px] top-[20px] h-[calc(100%-4px)] w-[2px] ${index < step ? "bg-[#388E3C]" : "bg-[#E0E0E0]"}`} /> : null}<span className={`mt-0.5 flex h-[18px] w-[18px] flex-shrink-0 items-center justify-center rounded-full border-2 ${index <= step ? "border-[#388E3C] bg-[#388E3C]" : "border-[#E0E0E0] bg-white"}`}>{index <= step ? <Check className="h-3 w-3 text-white" /> : null}</span><span><span className={`block text-[16px] ${index <= step ? "font-semibold text-[#212121]" : "text-[#878787]"}`}>{label}</span>{index === step ? <span className="mt-0.5 block text-[14px] text-[#388E3C]">In progress</span> : null}</span></div>)}</div></section>
-          <section className="mt-4 rounded-[4px] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.08)]"><div className="flex items-start gap-3"><span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[4px] bg-[#F0F5FF]"><UtensilsCrossed className="h-5 w-5 text-[#2874F0]" /></span><div><p className="text-[16px] font-medium text-[#212121]">Prepared at Biryani Blues, Sector 12</p><p className="mt-1 text-[14px] text-[#878787]">900 m away · delivered by eKart</p></div></div></section>
-          <section className="mt-4 rounded-[4px] bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.08)]"><p className="text-[14px] text-[#878787]">Order #FK-FD-2026081742 · Hyderabadi Biryani × 1 · ₹{total}</p></section>
+          <section className="rounded-[4px] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.08)]"><h1 className="mb-5 text-[22px] font-semibold text-[#212121]">Flipkart Dash order status</h1><div className="relative ml-3">{steps.map((label, index) => <div key={label} className="relative flex items-start gap-3 pb-7 last:pb-0">{index < steps.length - 1 ? <span className={`absolute left-[8px] top-[20px] h-[calc(100%-4px)] w-[2px] ${index < step ? "bg-[#388E3C]" : "bg-[#E0E0E0]"}`} /> : null}<span className={`mt-0.5 flex h-[18px] w-[18px] flex-shrink-0 items-center justify-center rounded-full border-2 ${index <= step ? "border-[#388E3C] bg-[#388E3C]" : "border-[#E0E0E0] bg-white"}`}>{index <= step ? <Check className="h-3 w-3 text-white" /> : null}</span><span><span className={`block text-[16px] ${index <= step ? "font-semibold text-[#212121]" : "text-[#878787]"}`}>{label}</span>{index === step ? <span className="mt-0.5 block text-[14px] text-[#388E3C]">In progress</span> : null}</span></div>)}</div></section>
+          <section className="mt-4 rounded-[4px] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.08)]"><div className="flex items-start gap-3"><span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[4px] bg-[#F0F5FF]"><UtensilsCrossed className="h-5 w-5 text-[#2874F0]" /></span><div><p className="text-[16px] font-medium text-[#212121]">Both items collected from Dash Hub, Sector 12 — 900m away.</p><p className="mt-1 text-[14px] text-[#878787]">Delivered by eKart.</p></div></div></section>
+          <section className="mt-4 rounded-[4px] bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.08)]"><p className="text-[14px] leading-relaxed text-[#878787]">Order #FK-DASH-2026081742 · Hyderabadi Biryani × 1 · Filter Coffee × 1 · ₹{order.total}</p></section>
         </div>
       </div>
     </div>
@@ -999,20 +1211,51 @@ function ConfirmedPage({ navigate, coins }: { navigate: (screen: Screen) => void
       <div className="mx-auto max-w-[920px]">
         <section className="rounded-[4px] bg-white p-7 text-center shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
           <span className="mx-auto mb-4 flex h-18 w-18 items-center justify-center rounded-full bg-[#E8F5E9]"><CheckCircle2 className="h-11 w-11 text-[#388E3C]" /></span>
-          <h1 className="text-[28px] font-semibold text-[#212121]">Order delivered!</h1><p className="mt-1 text-[16px] text-[#878787]">Your Hyderabadi Biryani from Biryani Blues has arrived</p>
-          <div className="mt-5 inline-flex items-center gap-4 rounded-[4px] bg-gradient-to-r from-[#FFF8E1] to-[#FFF3E0] p-5 text-left"><span className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#FFD700] to-[#FFA500]"><Zap className="h-6 w-6 fill-white text-white" /></span><div><p className="text-[18px] font-semibold text-[#212121]">You earned 30 SuperCoins on this order.</p><p className="mt-0.5 text-[14px] text-[#878787]">New balance: {coins.toLocaleString()} SuperCoins</p></div></div>
+          <h1 className="text-[28px] font-semibold text-[#212121]">Flipkart Dash order delivered!</h1><p className="mt-1 text-[16px] text-[#878787]">Your Biryani Blues + Chai &amp; More order has arrived</p>
+          <div className="mt-5 inline-flex items-center gap-4 rounded-[4px] bg-gradient-to-r from-[#FFF8E1] to-[#FFF3E0] p-5 text-left"><span className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#FFD700] to-[#FFA500]"><Zap className="h-6 w-6 fill-white text-white" /></span><div><p className="text-[18px] font-semibold text-[#212121]">You earned 40 SuperCoins on this order.</p><p className="mt-0.5 text-[14px] text-[#878787]">New balance: {coins.toLocaleString()} SuperCoins</p></div></div>
           <div className="mt-5 flex flex-wrap justify-center gap-3"><button type="button" onClick={() => navigate("food")} className="h-11 rounded-[4px] bg-[#2874F0] px-7 text-[16px] font-semibold text-white hover:bg-[#1A5DC8]">Order Again</button><button type="button" className="h-11 rounded-[4px] border border-[#E0E0E0] px-7 text-[16px] font-semibold text-[#212121] hover:bg-[#F5F5F5]">Rate Order</button></div>
         </section>
 
         <section className="mt-5 rounded-[4px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
           <div className="flex items-center justify-between px-5 pb-3 pt-5"><div><h2 className="text-[22px] font-semibold text-[#212121]">Spend them on Flipkart</h2><p className="mt-1 text-[14px] text-[#878787]">Use your {coins.toLocaleString()} SuperCoins on these deals</p></div><button type="button" className="text-[14px] font-semibold text-[#2874F0] hover:text-[#1A5DC8]">VIEW ALL</button></div>
-          <div className="hide-scrollbar flex gap-4 overflow-x-auto px-5 pb-5">
+          <div className="horizontal-rail hide-scrollbar flex gap-4 overflow-x-auto px-5 pb-5">
             {products.map((product) => <button type="button" key={product.name} className="restaurant-card group w-[260px] flex-shrink-0 overflow-hidden border border-[#E0E0E0] bg-white text-left"><Photo src={product.image} alt={product.name} sizes="260px" /><span className="block p-4"><span className="block truncate text-[18px] font-semibold text-[#212121] group-hover:text-[#2874F0]">{product.name}</span><span className="mt-2 flex items-center gap-2"><span className="text-[18px] font-bold text-[#212121]">₹{product.price}</span><span className="text-[14px] text-[#878787] line-through">₹{product.original}</span></span><span className="mt-2 block"><RatingPill rating={product.rating} /></span><span className="mt-2 flex items-center gap-1.5"><span className="flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-br from-[#FFD700] to-[#FFA500]"><Zap className="h-2.5 w-2.5 fill-white text-white" /></span><span className="text-[14px] text-[#878787]">Pay with SuperCoins</span></span></span></button>)}
           </div>
         </section>
 
-        <section className="mt-5 rounded-[4px] border border-[#D6E4FF] bg-[#F0F5FF] p-5 text-center"><p className="text-[18px] font-semibold text-[#2874F0]">The Flipkart loop</p><p className="mt-1 text-[14px] text-[#878787]">Shop on Flipkart → earn SuperCoins → spend on food → earn more coins → shop again</p><div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[14px] text-[#212121]">{["Shopping", "SuperCoins", "Food", "More Coins"].map((label, index) => <React.Fragment key={label}><span className={`rounded-[4px] border border-[#E0E0E0] px-3 py-1.5 ${index % 2 ? "bg-[#FFE11B] font-semibold" : "bg-white"}`}>{label}</span>{index < 3 ? <ChevronRight className="h-4 w-4 text-[#878787]" /> : null}</React.Fragment>)}</div></section>
+        <section className="mt-5 rounded-[4px] border border-[#D6E4FF] bg-[#F0F5FF] p-5 text-center"><p className="text-[18px] font-semibold text-[#2874F0]">The Flipkart Dash loop</p><p className="mt-1 text-[14px] text-[#878787]">Shop on Flipkart → earn SuperCoins → spend on Dash → earn more coins → shop again</p><div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[14px] text-[#212121]">{["Shopping", "SuperCoins", "Dash", "More Coins"].map((label, index) => <React.Fragment key={label}><span className={`rounded-[4px] border border-[#E0E0E0] px-3 py-1.5 ${index % 2 ? "bg-[#FFE11B] font-semibold" : "bg-white"}`}>{label}</span>{index < 3 ? <ChevronRight className="h-4 w-4 text-[#878787]" /> : null}</React.Fragment>)}</div></section>
       </div>
+    </div>
+  );
+}
+
+function ClubbedExplainerModal({ onClose }: { onClose: () => void }) {
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [onClose]);
+
+  const points = [
+    { icon: MapPin, copy: "Hubs sit next to campus, so hundreds of orders go to the same few gates." },
+    { icon: Bike, copy: "One rider carries 6–8 orders on a single run, so the ₹90 fee splits to ₹12." },
+    { icon: Zap, copy: "Priority skips the queue — 3 a month, so the clubbing still works for everyone." },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-6" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/45" />
+      <section role="dialog" aria-modal="true" aria-labelledby="clubbed-dialog-title" className="slide-up relative w-full max-w-[560px] rounded-[4px] bg-white p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)]" onClick={(event) => event.stopPropagation()}>
+        <div className="flex items-start justify-between gap-4"><div><p className="text-[13px] font-bold uppercase tracking-[0.12em] text-[#2874F0]">Flipkart Dash</p><h2 id="clubbed-dialog-title" className="mt-1 text-[22px] font-semibold text-[#212121]">How Clubbed delivery works</h2></div><button type="button" onClick={onClose} aria-label="Close Clubbed delivery explainer" className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full hover:bg-[#F1F3F6]"><X className="h-5 w-5 text-[#616161]" /></button></div>
+        <div className="mt-5 space-y-3">{points.map(({ icon: Icon, copy }) => <div key={copy} className="flex items-start gap-3 rounded-[4px] bg-[#F7F9FC] p-4"><span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#EAF2FF]"><Icon className="h-5 w-5 text-[#2874F0]" /></span><p className="pt-1 text-[15px] leading-relaxed text-[#4B5563]">{copy}</p></div>)}</div>
+      </section>
     </div>
   );
 }
@@ -1025,6 +1268,6 @@ function EconomicsDrawer({ onClose }: { onClose: () => void }) {
     ["4", "The marketplace funds the loop", "Commerce and advertising economics can underwrite food-order acquisition while food creates more frequent engagement with the Flipkart ecosystem."],
   ];
   return (
-    <div className="fixed inset-0 z-[100] flex justify-end" onClick={onClose}><div className="absolute inset-0 bg-black/40" /><aside className="slide-up relative h-full w-full max-w-[560px] overflow-y-auto bg-white" onClick={(event) => event.stopPropagation()}><div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E0E0E0] bg-white px-6 py-5"><h2 className="text-[22px] font-semibold text-[#212121]">The Economics of Flipkart Food</h2><button type="button" onClick={onClose} aria-label="Close economics panel" className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-[#F1F3F6]"><X className="h-5 w-5 text-[#878787]" /></button></div><div className="space-y-5 p-6">{blocks.map(([number, title, copy]) => <div key={number} className="rounded-[4px] bg-[#F1F3F6] p-5"><div className="mb-2 flex items-center gap-3"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#2874F0] text-[14px] font-bold text-white">{number}</span><h3 className="text-[18px] font-semibold text-[#212121]">{title}</h3></div><p className="text-[15px] leading-relaxed text-[#4B5563]">{copy}</p></div>)}</div></aside></div>
+    <div className="fixed inset-0 z-[100] flex justify-end" onClick={onClose}><div className="absolute inset-0 bg-black/40" /><aside className="slide-up relative h-full w-full max-w-[560px] overflow-y-auto bg-white" onClick={(event) => event.stopPropagation()}><div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E0E0E0] bg-white px-6 py-5"><h2 className="text-[22px] font-semibold text-[#212121]">The Economics of Flipkart Dash</h2><button type="button" onClick={onClose} aria-label="Close economics panel" className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-[#F1F3F6]"><X className="h-5 w-5 text-[#878787]" /></button></div><div className="space-y-5 p-6">{blocks.map(([number, title, copy]) => <div key={number} className="rounded-[4px] bg-[#F1F3F6] p-5"><div className="mb-2 flex items-center gap-3"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#2874F0] text-[14px] font-bold text-white">{number}</span><h3 className="text-[18px] font-semibold text-[#212121]">{title}</h3></div><p className="text-[15px] leading-relaxed text-[#4B5563]">{copy}</p></div>)}</div></aside></div>
   );
 }

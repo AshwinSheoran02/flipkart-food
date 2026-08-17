@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Flipkart Food — Order food delivery | Flipkart.com",
-  description: "Order food delivery from restaurants near you. Pay with SuperCoins. Free delivery on Flipkart Plus.",
+  title: "Flipkart Dash — Campus food delivery | Flipkart.com",
+  description: "Order from nearby Dash Hub brands with Clubbed or Priority campus delivery and pay with SuperCoins.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
