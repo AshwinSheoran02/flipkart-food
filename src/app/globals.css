@@ -36,7 +36,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -105,7 +105,12 @@ textarea {
 .horizontal-rail {
   overscroll-behavior-inline: contain;
   scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
   -webkit-overflow-scrolling: touch;
+}
+
+.horizontal-rail > * {
+  scroll-snap-align: start;
 }
 
 .banner-track {
@@ -157,6 +162,15 @@ textarea {
 .total-change {
   animation: total-change 0.48s cubic-bezier(0.2, 0.8, 0.2, 1);
   transform-origin: right center;
+}
+
+@keyframes fee-change {
+  0% { background: #fff3cd; opacity: 0.65; transform: translateY(-2px); }
+  100% { background: transparent; opacity: 1; transform: translateY(0); }
+}
+
+.fee-change {
+  animation: fee-change 0.45s ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {
