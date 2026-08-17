@@ -553,23 +553,29 @@ function FoodLanding({ navigate, openRestaurant, restaurants, query, bannerIndex
         <div className="mt-3 flex justify-center gap-2">{BANNERS.map((b, i) => <button type="button" aria-label={`Banner ${i + 1}`} key={b.title} onClick={() => setBannerIndex(i)} className={`h-2.5 rounded-full ${bannerIndex === i ? "w-7 bg-[#2874F0]" : "w-2.5 bg-[#C7C7C7] hover:bg-[#878787]"}`} />)}</div>
       </section>
 
-      <section className="mb-5 rounded-[4px] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
-        <h2 className="text-[22px] font-semibold text-[#212121]">Your Dash Hub — Sector 12, 900m away</h2>
-        <p className="mt-1 text-[16px] text-[#616161]">Located next to campus. Six brands cooking under one roof, one rider brings them all.</p>
-        <p className="mt-1 text-[14px] leading-relaxed text-[#878787]">Hubs are sited beside high-density campuses, so orders naturally cluster and delivery costs split.</p>
-        <div className="horizontal-rail hide-scrollbar mt-5 flex gap-4 overflow-x-auto pb-1">
-          {hubBrands.map(b => <button type="button" key={b.id} onClick={() => openRestaurant(b.id)} className="restaurant-card group w-[190px] flex-shrink-0 overflow-hidden border border-[#E0E0E0] bg-white text-left"><Photo src={b.image} alt={`${b.name} at Dash Hub`} sizes="190px" /><span className="block truncate p-3 text-[16px] font-semibold text-[#212121] group-hover:text-[#2874F0]">{b.name}</span></button>)}
-          <div className="w-[190px] flex-shrink-0 overflow-hidden rounded-[4px] border border-[#2874F0]/20 bg-gradient-to-b from-[#0F172A] to-[#1E293B]">
-            <div className="aspect-[3/4] w-full overflow-hidden">
-              <iframe className="h-full w-full border-0" src="https://www.youtube-nocookie.com/embed/2nP8rSEEeus" title="Flipkart Dash campus delivery video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen />
+      <section className="mb-5 rounded-[4px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
+        <div className="flex gap-0">
+          <div className="min-w-0 flex-1 p-5">
+            <h2 className="text-[22px] font-semibold text-[#212121]">Your Dash Hub — Sector 12, 900m away</h2>
+            <p className="mt-1 text-[16px] text-[#616161]">Located next to campus. Six brands cooking under one roof, one rider brings them all.</p>
+            <p className="mt-1 text-[14px] leading-relaxed text-[#878787]">Hubs are sited beside high-density campuses, so orders naturally cluster and delivery costs split.</p>
+            <div className="horizontal-rail hide-scrollbar mt-5 flex gap-4 overflow-x-auto pb-1">
+              {hubBrands.map(b => <button type="button" key={b.id} onClick={() => openRestaurant(b.id)} className="restaurant-card group w-[170px] flex-shrink-0 overflow-hidden border border-[#E0E0E0] bg-white text-left"><Photo src={b.image} alt={`${b.name} at Dash Hub`} sizes="170px" /><span className="block truncate p-3 text-[15px] font-semibold text-[#212121] group-hover:text-[#2874F0]">{b.name}</span></button>)}
             </div>
-            <div className="px-3 py-2.5 text-center">
-              <p className="text-[13px] font-semibold text-white">See how it works</p>
-              <p className="mt-0.5 text-[11px] text-white/50">Campus delivery in 60s</p>
-            </div>
+            <p className="mt-4 border-t border-[#E0E0E0] pt-4 text-[14px] leading-relaxed text-[#878787]">Brands cook. Dash handles delivery, tech and payments — so commission stays near 5%, not 25%.</p>
           </div>
+          <aside className="hidden w-[200px] flex-shrink-0 border-l border-[#F0F0F0] p-4 lg:block">
+            <div className="overflow-hidden rounded-[6px] border border-[#2874F0]/15 bg-gradient-to-b from-[#0F172A] to-[#1E293B] shadow-sm">
+              <div className="aspect-[9/14] w-full overflow-hidden">
+                <iframe className="h-full w-full border-0" src="https://www.youtube-nocookie.com/embed/2nP8rSEEeus" title="Flipkart Dash campus delivery video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen />
+              </div>
+              <div className="px-2.5 py-2 text-center">
+                <p className="text-[12px] font-semibold text-white">See how it works</p>
+                <p className="mt-0.5 text-[10px] text-white/50">Campus delivery in 60s</p>
+              </div>
+            </div>
+          </aside>
         </div>
-        <p className="mt-4 border-t border-[#E0E0E0] pt-4 text-[14px] leading-relaxed text-[#878787]">Brands cook. Dash handles delivery, tech and payments — so commission stays near 5%, not 25%.</p>
       </section>
 
       <section className="mb-5 rounded-[4px] border border-[#C8E6C9] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
