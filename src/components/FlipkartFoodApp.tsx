@@ -601,14 +601,14 @@ function FoodLanding({ navigate, openRestaurant, restaurants, query, bannerIndex
           </section>
         </div>
 
-        <aside className="sticky top-[120px] hidden h-fit w-[180px] flex-shrink-0 self-start xl:block">
+        <aside className="sticky top-[120px] hidden h-fit w-[380px] flex-shrink-0 self-start xl:block">
           <div className="overflow-hidden rounded-lg border border-white/10 bg-gradient-to-b from-[#0F172A] to-[#1E293B] shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
-            <div className="aspect-[9/14] w-full overflow-hidden">
+            <div className="aspect-[9/16] w-full overflow-hidden">
               <iframe className="h-full w-full border-0" src="https://www.youtube-nocookie.com/embed/2nP8rSEEeus" title="Flipkart Dash campus delivery video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen />
             </div>
-            <div className="px-3 py-2.5 text-center">
-              <p className="text-[12px] font-semibold text-white">See how it works</p>
-              <p className="mt-0.5 text-[10px] text-white/50">Campus delivery in 60s</p>
+            <div className="px-4 py-3 text-center">
+              <p className="text-[15px] font-semibold text-white">See how it works</p>
+              <p className="mt-0.5 text-[12px] text-white/50">Campus delivery in 60s</p>
             </div>
           </div>
         </aside>
