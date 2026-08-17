@@ -469,20 +469,6 @@ export function FlipkartFoodApp() {
         )}
       </header>
 
-      {screen === "food" ? (
-        <aside className="video-sidebar fixed top-1/2 z-40 -translate-y-1/2" style={{ right: "max(8px, calc((100vw - 1448px) / 2 - 8px))" }}>
-          <div className="w-[156px] overflow-hidden rounded-lg border border-white/10 bg-gradient-to-b from-[#0F172A] to-[#1E293B] shadow-[0_8px_32px_rgba(0,0,0,0.25)]">
-            <div className="aspect-[9/14] w-full overflow-hidden">
-              <iframe className="h-full w-full border-0" src="https://www.youtube-nocookie.com/embed/2nP8rSEEeus" title="Flipkart Dash campus delivery video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen />
-            </div>
-            <div className="px-3 py-2.5 text-center">
-              <p className="text-[12px] font-semibold text-white">See how it works</p>
-              <p className="mt-0.5 text-[10px] text-white/50">Campus delivery in 60s</p>
-            </div>
-          </div>
-        </aside>
-      ) : null}
-
       <main className="page-shell">
         {screen === "food" ? <FoodLanding navigate={navigate} openRestaurant={openRestaurant} restaurants={visibleRestaurants} query={query} bannerIndex={bannerIndex} setBannerIndex={setBannerIndex} priorityDeliveries={displayedPriority} openClubbedInfo={() => setClubbedInfoOpen(true)} /> : null}
         {screen === "restaurant" ? <RestaurantPage navigate={navigate} restaurant={selectedRestaurant} addToCart={addToCart} removeFromCart={removeFromCart} getQty={getQty} cartCount={cartCount} cart={cart} /> : null}
@@ -547,70 +533,86 @@ function FoodLanding({ navigate, openRestaurant, restaurants, query, bannerIndex
 
   return (
     <div className="fade-in py-6">
-      <section aria-label="Featured food offers" className="relative mb-7">
-        <div className="overflow-hidden rounded-[4px]"><div className="banner-track flex" style={{ transform: `translateX(-${bannerIndex * 100}%)` }}>
-          {BANNERS.map((b, i) => (
-            <button type="button" key={b.title} onClick={() => openRestaurant(i === 2 ? 4 : i === 1 ? 3 : 0)} className={`relative w-full flex-shrink-0 overflow-hidden rounded-[4px] text-left sm:min-h-[300px] ${b.background}`}>
-              <span className="absolute right-0 top-0 w-full overflow-hidden rounded-[4px] shadow-[0_8px_24px_rgba(0,0,0,0.28)] sm:right-4 sm:top-1/2 sm:w-[400px] sm:max-w-[48%] sm:-translate-y-1/2"><Photo src={b.image} alt="" priority={i === 0} sizes="(max-width: 640px) calc(100vw - 48px), 400px" /></span>
-              <span className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/10" />
-              <span className="relative z-10 block max-w-full px-6 pb-8 pt-[280px] text-white sm:max-w-[58%] sm:px-20 sm:py-16">
-                <span className="mb-3 block text-[13px] font-bold tracking-[0.16em] text-white/80">{b.eyebrow}</span>
-                <span className="block text-[28px] font-bold leading-tight sm:text-[36px]">{b.title}</span>
-                <span className="mt-3 block text-[16px] leading-relaxed text-white/85 sm:text-[18px]">{b.subtitle}</span>
-                <span className="mt-5 inline-flex items-center gap-2 rounded-[4px] bg-white px-4 py-2 text-[15px] font-semibold text-[#2874F0]">Explore now <ChevronRight className="h-4 w-4" /></span>
-              </span>
-            </button>
-          ))}
-        </div></div>
-        <button type="button" aria-label="Previous banner" onClick={() => setBannerIndex((bannerIndex - 1 + BANNERS.length) % BANNERS.length)} className="absolute left-3 top-[128px] flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow hover:shadow-md sm:top-1/2"><ChevronLeft className="h-5 w-5 text-[#212121]" /></button>
-        <button type="button" aria-label="Next banner" onClick={() => setBannerIndex((bannerIndex + 1) % BANNERS.length)} className="absolute right-3 top-[128px] flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow hover:shadow-md sm:top-1/2"><ChevronRight className="h-5 w-5 text-[#212121]" /></button>
-        <div className="mt-3 flex justify-center gap-2">{BANNERS.map((b, i) => <button type="button" aria-label={`Banner ${i + 1}`} key={b.title} onClick={() => setBannerIndex(i)} className={`h-2.5 rounded-full ${bannerIndex === i ? "w-7 bg-[#2874F0]" : "w-2.5 bg-[#C7C7C7] hover:bg-[#878787]"}`} />)}</div>
-      </section>
+      <div className="flex gap-5">
+        <div className="min-w-0 flex-1">
+          <section aria-label="Featured food offers" className="relative mb-7">
+            <div className="overflow-hidden rounded-[4px]"><div className="banner-track flex" style={{ transform: `translateX(-${bannerIndex * 100}%)` }}>
+              {BANNERS.map((b, i) => (
+                <button type="button" key={b.title} onClick={() => openRestaurant(i === 2 ? 4 : i === 1 ? 3 : 0)} className={`relative w-full flex-shrink-0 overflow-hidden rounded-[4px] text-left sm:min-h-[300px] ${b.background}`}>
+                  <span className="absolute right-0 top-0 w-full overflow-hidden rounded-[4px] shadow-[0_8px_24px_rgba(0,0,0,0.28)] sm:right-4 sm:top-1/2 sm:w-[400px] sm:max-w-[48%] sm:-translate-y-1/2"><Photo src={b.image} alt="" priority={i === 0} sizes="(max-width: 640px) calc(100vw - 48px), 400px" /></span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/10" />
+                  <span className="relative z-10 block max-w-full px-6 pb-8 pt-[280px] text-white sm:max-w-[58%] sm:px-20 sm:py-16">
+                    <span className="mb-3 block text-[13px] font-bold tracking-[0.16em] text-white/80">{b.eyebrow}</span>
+                    <span className="block text-[28px] font-bold leading-tight sm:text-[36px]">{b.title}</span>
+                    <span className="mt-3 block text-[16px] leading-relaxed text-white/85 sm:text-[18px]">{b.subtitle}</span>
+                    <span className="mt-5 inline-flex items-center gap-2 rounded-[4px] bg-white px-4 py-2 text-[15px] font-semibold text-[#2874F0]">Explore now <ChevronRight className="h-4 w-4" /></span>
+                  </span>
+                </button>
+              ))}
+            </div></div>
+            <button type="button" aria-label="Previous banner" onClick={() => setBannerIndex((bannerIndex - 1 + BANNERS.length) % BANNERS.length)} className="absolute left-3 top-[128px] flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow hover:shadow-md sm:top-1/2"><ChevronLeft className="h-5 w-5 text-[#212121]" /></button>
+            <button type="button" aria-label="Next banner" onClick={() => setBannerIndex((bannerIndex + 1) % BANNERS.length)} className="absolute right-3 top-[128px] flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow hover:shadow-md sm:top-1/2"><ChevronRight className="h-5 w-5 text-[#212121]" /></button>
+            <div className="mt-3 flex justify-center gap-2">{BANNERS.map((b, i) => <button type="button" aria-label={`Banner ${i + 1}`} key={b.title} onClick={() => setBannerIndex(i)} className={`h-2.5 rounded-full ${bannerIndex === i ? "w-7 bg-[#2874F0]" : "w-2.5 bg-[#C7C7C7] hover:bg-[#878787]"}`} />)}</div>
+          </section>
 
-      <section className="mb-5 rounded-[4px] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
-        <h2 className="text-[22px] font-semibold text-[#212121]">Your Dash Hub — Sector 12, 900m away</h2>
-        <p className="mt-1 text-[16px] text-[#616161]">Located next to campus. Six brands cooking under one roof, one rider brings them all.</p>
-        <p className="mt-1 text-[14px] leading-relaxed text-[#878787]">Hubs are sited beside high-density campuses, so orders naturally cluster and delivery costs split.</p>
-        <div className="horizontal-rail hide-scrollbar mt-5 flex gap-4 overflow-x-auto pb-1">
-          {hubBrands.map(b => <button type="button" key={b.id} onClick={() => openRestaurant(b.id)} className="restaurant-card group w-[190px] flex-shrink-0 overflow-hidden border border-[#E0E0E0] bg-white text-left"><Photo src={b.image} alt={`${b.name} at Dash Hub`} sizes="190px" /><span className="block truncate p-3 text-[16px] font-semibold text-[#212121] group-hover:text-[#2874F0]">{b.name}</span></button>)}
+          <section className="mb-5 rounded-[4px] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
+            <h2 className="text-[22px] font-semibold text-[#212121]">Your Dash Hub — Sector 12, 900m away</h2>
+            <p className="mt-1 text-[16px] text-[#616161]">Located next to campus. Six brands cooking under one roof, one rider brings them all.</p>
+            <p className="mt-1 text-[14px] leading-relaxed text-[#878787]">Hubs are sited beside high-density campuses, so orders naturally cluster and delivery costs split.</p>
+            <div className="horizontal-rail hide-scrollbar mt-5 flex gap-4 overflow-x-auto pb-1">
+              {hubBrands.map(b => <button type="button" key={b.id} onClick={() => openRestaurant(b.id)} className="restaurant-card group w-[190px] flex-shrink-0 overflow-hidden border border-[#E0E0E0] bg-white text-left"><Photo src={b.image} alt={`${b.name} at Dash Hub`} sizes="190px" /><span className="block truncate p-3 text-[16px] font-semibold text-[#212121] group-hover:text-[#2874F0]">{b.name}</span></button>)}
+            </div>
+            <p className="mt-4 border-t border-[#E0E0E0] pt-4 text-[14px] leading-relaxed text-[#878787]">Brands cook. Dash handles delivery, tech and payments — so commission stays near 5%, not 25%.</p>
+          </section>
+
+          <section className="mb-5 rounded-[4px] border border-[#C8E6C9] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
+            <div className="flex items-start gap-4">
+              <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#E8F5E9]"><CheckCircle2 className="h-6 w-6 text-[#388E3C]" /></span>
+              <div className="min-w-0">
+                <p className="text-[14px] font-semibold text-[#388E3C]">Student verified · ashwin@[college].edu</p>
+                <h2 className="mt-1 text-[22px] font-semibold text-[#212121]">You have {priorityDeliveries} Priority deliveries left this month</h2>
+                <p className="mt-2 max-w-[980px] text-[15px] leading-relaxed text-[#616161]">Verified students get 3 Priority orders a month — solo rider, 12–15 min. Every other order arrives Clubbed at 20–25 min, and costs less.</p>
+                <button type="button" onClick={openClubbedInfo} className="mt-3 text-[14px] font-semibold text-[#2874F0] hover:text-[#1A5DC8]">How Clubbed delivery works</button>
+              </div>
+            </div>
+          </section>
+
+          <section className="mb-5 rounded-[4px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
+            <div className="flex items-center justify-between px-5 pb-3 pt-5">
+              <div><h2 className="text-[22px] font-semibold text-[#212121]">{query ? `Results for "${query}"` : "Ashwin, hungry again?"}</h2><p className="mt-1 text-[14px] text-[#878787]">Real menus, campus-friendly delivery times</p></div>
+              <button type="button" onClick={() => document.getElementById("all-restaurants")?.scrollIntoView({ behavior: "smooth" })} className="text-[14px] font-semibold text-[#2874F0] hover:text-[#1A5DC8]">VIEW ALL</button>
+            </div>
+            <div className="relative px-5 pb-5">
+              {restaurants.length ? <><div ref={railRef} className="horizontal-rail hide-scrollbar flex gap-4 overflow-x-auto">{restaurants.map(r => <RestaurantCard key={r.id} restaurant={r} rail onOpen={() => openRestaurant(r.id)} />)}</div>{!railEdges.atStart ? <button type="button" onClick={() => scrollR(-1)} className="absolute left-1 top-[96px] flex h-11 w-11 items-center justify-center rounded-full border border-[#E0E0E0] bg-white shadow hover:shadow-md"><ChevronLeft className="h-5 w-5" /></button> : null}{!railEdges.atEnd ? <button type="button" onClick={() => scrollR(1)} className="absolute right-1 top-[96px] flex h-11 w-11 items-center justify-center rounded-full border border-[#E0E0E0] bg-white shadow hover:shadow-md"><ChevronRight className="h-5 w-5" /></button> : null}</> : <div className="py-5 text-[16px] text-[#878787]">No restaurants match. Try a dish or cuisine.</div>}
+            </div>
+          </section>
+
+          <section id="all-restaurants" className="scroll-mt-20 rounded-[4px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
+            <div className="px-5 pb-3 pt-5"><h2 className="text-[22px] font-semibold text-[#212121]">Under 20 minutes near Hostel Block C</h2><p className="mt-1 text-[14px] text-[#878787]">Delivered by eKart — Flipkart&apos;s own fleet</p></div>
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4 px-5 pb-5">{restaurants.map(r => <RestaurantCard key={r.id} restaurant={r} onOpen={() => openRestaurant(r.id)} />)}</div>
+          </section>
+
+          <section className="mt-5 rounded-[4px] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
+            <div className="mb-4"><h2 className="text-[22px] font-semibold text-[#212121]">Specially for you, Ashwin</h2><p className="mt-1 text-[14px] text-[#878787]">Your go-to picks for Sundays, late nights, match nights and cravings.</p></div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {occasions.map(o => <button type="button" key={o.title} onClick={() => navigate("food")} className="restaurant-card overflow-hidden border border-[#E0E0E0] bg-white text-left"><Photo src={o.image} alt={`${o.title} food occasion`} sizes="(max-width: 640px) 100vw, 300px" /><span className="block p-4"><span className="block text-[18px] font-semibold text-[#212121]">{o.title}</span><span className="mt-1 block text-[14px] text-[#878787]">{o.detail}</span></span></button>)}
+            </div>
+            <p className="mt-5 rounded-[4px] bg-[#F0F5FF] px-4 py-3 text-[16px] font-medium text-[#2874F0]">Your campus, your schedule — Dash delivers whenever you need it.</p>
+          </section>
         </div>
-        <p className="mt-4 border-t border-[#E0E0E0] pt-4 text-[14px] leading-relaxed text-[#878787]">Brands cook. Dash handles delivery, tech and payments — so commission stays near 5%, not 25%.</p>
-      </section>
 
-      <section className="mb-5 rounded-[4px] border border-[#C8E6C9] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
-        <div className="flex items-start gap-4">
-          <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#E8F5E9]"><CheckCircle2 className="h-6 w-6 text-[#388E3C]" /></span>
-          <div className="min-w-0">
-            <p className="text-[14px] font-semibold text-[#388E3C]">Student verified · ashwin@[college].edu</p>
-            <h2 className="mt-1 text-[22px] font-semibold text-[#212121]">You have {priorityDeliveries} Priority deliveries left this month</h2>
-            <p className="mt-2 max-w-[980px] text-[15px] leading-relaxed text-[#616161]">Verified students get 3 Priority orders a month — solo rider, 12–15 min. Every other order arrives Clubbed at 20–25 min, and costs less.</p>
-            <button type="button" onClick={openClubbedInfo} className="mt-3 text-[14px] font-semibold text-[#2874F0] hover:text-[#1A5DC8]">How Clubbed delivery works</button>
+        <aside className="sticky top-[120px] hidden h-fit w-[180px] flex-shrink-0 self-start xl:block">
+          <div className="overflow-hidden rounded-lg border border-white/10 bg-gradient-to-b from-[#0F172A] to-[#1E293B] shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
+            <div className="aspect-[9/14] w-full overflow-hidden">
+              <iframe className="h-full w-full border-0" src="https://www.youtube-nocookie.com/embed/2nP8rSEEeus" title="Flipkart Dash campus delivery video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen />
+            </div>
+            <div className="px-3 py-2.5 text-center">
+              <p className="text-[12px] font-semibold text-white">See how it works</p>
+              <p className="mt-0.5 text-[10px] text-white/50">Campus delivery in 60s</p>
+            </div>
           </div>
-        </div>
-      </section>
-
-      <section className="mb-5 rounded-[4px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
-        <div className="flex items-center justify-between px-5 pb-3 pt-5">
-          <div><h2 className="text-[22px] font-semibold text-[#212121]">{query ? `Results for "${query}"` : "Ashwin, hungry again?"}</h2><p className="mt-1 text-[14px] text-[#878787]">Real menus, campus-friendly delivery times</p></div>
-          <button type="button" onClick={() => document.getElementById("all-restaurants")?.scrollIntoView({ behavior: "smooth" })} className="text-[14px] font-semibold text-[#2874F0] hover:text-[#1A5DC8]">VIEW ALL</button>
-        </div>
-        <div className="relative px-5 pb-5">
-          {restaurants.length ? <><div ref={railRef} className="horizontal-rail hide-scrollbar flex gap-4 overflow-x-auto">{restaurants.map(r => <RestaurantCard key={r.id} restaurant={r} rail onOpen={() => openRestaurant(r.id)} />)}</div>{!railEdges.atStart ? <button type="button" onClick={() => scrollR(-1)} className="absolute left-1 top-[96px] flex h-11 w-11 items-center justify-center rounded-full border border-[#E0E0E0] bg-white shadow hover:shadow-md"><ChevronLeft className="h-5 w-5" /></button> : null}{!railEdges.atEnd ? <button type="button" onClick={() => scrollR(1)} className="absolute right-1 top-[96px] flex h-11 w-11 items-center justify-center rounded-full border border-[#E0E0E0] bg-white shadow hover:shadow-md"><ChevronRight className="h-5 w-5" /></button> : null}</> : <div className="py-5 text-[16px] text-[#878787]">No restaurants match. Try a dish or cuisine.</div>}
-        </div>
-      </section>
-
-      <section id="all-restaurants" className="scroll-mt-20 rounded-[4px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
-        <div className="px-5 pb-3 pt-5"><h2 className="text-[22px] font-semibold text-[#212121]">Under 20 minutes near Hostel Block C</h2><p className="mt-1 text-[14px] text-[#878787]">Delivered by eKart — Flipkart&apos;s own fleet</p></div>
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4 px-5 pb-5">{restaurants.map(r => <RestaurantCard key={r.id} restaurant={r} onOpen={() => openRestaurant(r.id)} />)}</div>
-      </section>
-
-      <section className="mt-5 rounded-[4px] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
-        <div className="mb-4"><h2 className="text-[22px] font-semibold text-[#212121]">Specially for you, Ashwin</h2><p className="mt-1 text-[14px] text-[#878787]">Your go-to picks for Sundays, late nights, match nights and cravings.</p></div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {occasions.map(o => <button type="button" key={o.title} onClick={() => navigate("food")} className="restaurant-card overflow-hidden border border-[#E0E0E0] bg-white text-left"><Photo src={o.image} alt={`${o.title} food occasion`} sizes="(max-width: 640px) 100vw, 300px" /><span className="block p-4"><span className="block text-[18px] font-semibold text-[#212121]">{o.title}</span><span className="mt-1 block text-[14px] text-[#878787]">{o.detail}</span></span></button>)}
-        </div>
-        <p className="mt-5 rounded-[4px] bg-[#F0F5FF] px-4 py-3 text-[16px] font-medium text-[#2874F0]">Your campus, your schedule — Dash delivers whenever you need it.</p>
-      </section>
+        </aside>
+      </div>
     </div>
   );
 }
