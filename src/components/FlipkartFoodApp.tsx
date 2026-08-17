@@ -559,6 +559,15 @@ function FoodLanding({ navigate, openRestaurant, restaurants, query, bannerIndex
         <p className="mt-1 text-[14px] leading-relaxed text-[#878787]">Hubs are sited beside high-density campuses, so orders naturally cluster and delivery costs split.</p>
         <div className="horizontal-rail hide-scrollbar mt-5 flex gap-4 overflow-x-auto pb-1">
           {hubBrands.map(b => <button type="button" key={b.id} onClick={() => openRestaurant(b.id)} className="restaurant-card group w-[190px] flex-shrink-0 overflow-hidden border border-[#E0E0E0] bg-white text-left"><Photo src={b.image} alt={`${b.name} at Dash Hub`} sizes="190px" /><span className="block truncate p-3 text-[16px] font-semibold text-[#212121] group-hover:text-[#2874F0]">{b.name}</span></button>)}
+          <div className="w-[190px] flex-shrink-0 overflow-hidden rounded-[4px] border border-[#2874F0]/20 bg-gradient-to-b from-[#0F172A] to-[#1E293B]">
+            <div className="aspect-[3/4] w-full overflow-hidden">
+              <iframe className="h-full w-full border-0" src="https://www.youtube-nocookie.com/embed/2nP8rSEEeus" title="Flipkart Dash campus delivery video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen />
+            </div>
+            <div className="px-3 py-2.5 text-center">
+              <p className="text-[13px] font-semibold text-white">See how it works</p>
+              <p className="mt-0.5 text-[11px] text-white/50">Campus delivery in 60s</p>
+            </div>
+          </div>
         </div>
         <p className="mt-4 border-t border-[#E0E0E0] pt-4 text-[14px] leading-relaxed text-[#878787]">Brands cook. Dash handles delivery, tech and payments — so commission stays near 5%, not 25%.</p>
       </section>
@@ -580,16 +589,8 @@ function FoodLanding({ navigate, openRestaurant, restaurants, query, bannerIndex
           <div><h2 className="text-[22px] font-semibold text-[#212121]">{query ? `Results for "${query}"` : "Ashwin, hungry again?"}</h2><p className="mt-1 text-[14px] text-[#878787]">Real menus, campus-friendly delivery times</p></div>
           <button type="button" onClick={() => document.getElementById("all-restaurants")?.scrollIntoView({ behavior: "smooth" })} className="text-[14px] font-semibold text-[#2874F0] hover:text-[#1A5DC8]">VIEW ALL</button>
         </div>
-        <div className="grid min-w-0 gap-4 px-5 pb-5 lg:grid-cols-[minmax(0,1fr)_280px]">
-          <div className="relative min-w-0">
-            {restaurants.length ? <><div ref={railRef} className="horizontal-rail hide-scrollbar flex gap-4 overflow-x-auto">{restaurants.map(r => <RestaurantCard key={r.id} restaurant={r} rail onOpen={() => openRestaurant(r.id)} />)}</div>{!railEdges.atStart ? <button type="button" onClick={() => scrollR(-1)} className="absolute left-1 top-[96px] flex h-11 w-11 items-center justify-center rounded-full border border-[#E0E0E0] bg-white shadow hover:shadow-md"><ChevronLeft className="h-5 w-5" /></button> : null}{!railEdges.atEnd ? <button type="button" onClick={() => scrollR(1)} className="absolute right-1 top-[96px] flex h-11 w-11 items-center justify-center rounded-full border border-[#E0E0E0] bg-white shadow hover:shadow-md"><ChevronRight className="h-5 w-5" /></button> : null}</> : <div className="py-5 text-[16px] text-[#878787]">No restaurants match. Try a dish or cuisine.</div>}
-          </div>
-          <aside className="min-w-0 rounded-[4px] bg-[#111827] p-3 text-white">
-            <div className="mx-auto aspect-[9/16] w-full max-w-[205px] overflow-hidden rounded-[4px] bg-black">
-              <iframe className="h-full w-full border-0" src="https://www.youtube-nocookie.com/embed/2nP8rSEEeus" title="Flipkart Dash campus delivery video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen />
-            </div>
-            <p className="mt-2 text-center text-[13px] text-white/75">Made for your campus, made for you.</p>
-          </aside>
+        <div className="relative px-5 pb-5">
+          {restaurants.length ? <><div ref={railRef} className="horizontal-rail hide-scrollbar flex gap-4 overflow-x-auto">{restaurants.map(r => <RestaurantCard key={r.id} restaurant={r} rail onOpen={() => openRestaurant(r.id)} />)}</div>{!railEdges.atStart ? <button type="button" onClick={() => scrollR(-1)} className="absolute left-1 top-[96px] flex h-11 w-11 items-center justify-center rounded-full border border-[#E0E0E0] bg-white shadow hover:shadow-md"><ChevronLeft className="h-5 w-5" /></button> : null}{!railEdges.atEnd ? <button type="button" onClick={() => scrollR(1)} className="absolute right-1 top-[96px] flex h-11 w-11 items-center justify-center rounded-full border border-[#E0E0E0] bg-white shadow hover:shadow-md"><ChevronRight className="h-5 w-5" /></button> : null}</> : <div className="py-5 text-[16px] text-[#878787]">No restaurants match. Try a dish or cuisine.</div>}
         </div>
       </section>
 
