@@ -199,10 +199,10 @@ function VegIndicator({ veg }: { veg: boolean }) {
 
 function QtyControl({ qty, onAdd, onRemove }: { qty: number; onAdd: () => void; onRemove: () => void }) {
   return (
-    <div className="mx-auto -mt-4 flex h-9 items-center overflow-hidden rounded-[4px] border border-[#2874F0] bg-white shadow">
-      <button type="button" onClick={onRemove} className="flex h-full w-8 items-center justify-center text-[#2874F0] hover:bg-[#F0F5FF]"><Minus className="h-3.5 w-3.5" /></button>
-      <span className="flex h-full w-8 items-center justify-center text-[14px] font-bold text-[#2874F0]">{qty}</span>
-      <button type="button" onClick={onAdd} className="flex h-full w-8 items-center justify-center text-[#2874F0] hover:bg-[#F0F5FF]"><Plus className="h-3.5 w-3.5" /></button>
+    <div className="mx-auto mt-2 flex h-9 items-center overflow-hidden rounded-[4px] border border-[#2874F0] bg-white shadow">
+      <button type="button" onClick={onRemove} className="flex h-full w-9 items-center justify-center text-[#2874F0] hover:bg-[#F0F5FF]"><Minus className="h-4 w-4" /></button>
+      <span className="flex h-full w-9 items-center justify-center border-x border-[#2874F0]/20 text-[15px] font-bold text-[#2874F0]">{qty}</span>
+      <button type="button" onClick={onAdd} className="flex h-full w-9 items-center justify-center text-[#2874F0] hover:bg-[#F0F5FF]"><Plus className="h-4 w-4" /></button>
     </div>
   );
 }
@@ -654,12 +654,12 @@ function RestaurantPage({ navigate, restaurant, addToCart, removeFromCart, getQt
                       <p className="mt-2 text-[16px] font-medium text-[#212121]">₹{item.price}</p>
                       <p className="mt-1 max-w-[600px] text-[14px] leading-relaxed text-[#878787]">{item.desc}</p>
                     </div>
-                    <div className="w-[132px] flex-shrink-0">
+                    <div className="w-[132px] flex-shrink-0 text-center">
                       <Photo src={item.image} alt={item.name} sizes="132px" />
                       {qty > 0 ? (
                         <QtyControl qty={qty} onAdd={() => addToCart(item.name, restaurant.name, item.price, item.veg, item.image)} onRemove={() => removeFromCart(item.name, restaurant.name)} />
                       ) : (
-                        <button type="button" onClick={() => addToCart(item.name, restaurant.name, item.price, item.veg, item.image)} className="mx-auto -mt-4 flex h-9 min-w-[92px] items-center justify-center rounded-[4px] border border-[#2874F0] bg-white px-4 text-[14px] font-semibold text-[#2874F0] shadow hover:bg-[#F0F5FF]">ADD</button>
+                        <button type="button" onClick={() => addToCart(item.name, restaurant.name, item.price, item.veg, item.image)} className="mx-auto mt-2 flex h-9 min-w-[100px] items-center justify-center rounded-[4px] border border-[#2874F0] bg-white px-4 text-[14px] font-bold text-[#2874F0] shadow-sm hover:bg-[#F0F5FF]">ADD +</button>
                       )}
                     </div>
                   </div>
